@@ -20,6 +20,16 @@ type Credentials struct {
 	AccessTokenSecret string
 }
 
+func notGreek(tweet string) bool {
+	notGreek := true
+	for _, char := range tweet {
+		if char >= 945 && char <= 1023 {
+			notGreek = false
+		}
+	}
+	return notGreek
+}
+
 func loadCreds() (Credentials, error) {
 	err := godotenv.Load()
 	if err != nil {
@@ -90,15 +100,18 @@ func searchTweets(c *twitter.Client, query string) {
 }
 
 func main() {
-	creds, err := loadCreds()
-	client, err := getClient(&creds)
-	if err != nil {
-		log.Println("Error getting Twitter Client")
-		log.Println(err)
-	}
-	fmt.Printf("%+v\n", client)
-	fmt.Println("\n================================")
-	sendTweet(client, "third test tweet from #golang twitter bot")
-	fmt.Println("\n================================")
-	searchTweets(client, "#golang")
+	// creds, err := loadCreds()
+	// client, err := getClient(&creds)
+	// if err != nil {
+	// 	log.Println("Error getting Twitter Client")
+	// 	log.Println(err)
+	// }
+	// fmt.Printf("%+v\n", client)
+	// fmt.Println("\n================================")
+	// sendTweet(client, "third test tweet from #golang twitter bot")
+	// fmt.Println("\n================================")
+	// searchTweets(client, "#golang")
+
+	fmt.Println(notGreek("Ευγνώμων για την επανεκκίνηση της ανοικοδόμησης του Αγ. Νικολάου στο «Ground Zero» με τον @NYGovCuomo	. Αυτό το Εθνικό Ι. Προσκύνημα θα αποτελεί σύμβολο αγάπης, συμφιλίωσης, θρησκευτικής ελευθερίας και ελευθερίας της συνείδησης που δεν λειτουργεί με αποκλεισμούς, αλλά καλωσορίζει."))
+	fmt.Println(notGreek("You hear about #blockchain but don't quite get how it fits in an enterprise environment? 'Blockchain: Understanding its Uses and Implications' is a free training course from @linuxfoundation and @hyperledger that can help: https://bit.ly/3cbAv8C #learnlinux #distributedledger"))
 }
