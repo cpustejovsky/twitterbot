@@ -20,6 +20,22 @@ type Credentials struct {
 	AccessTokenSecret string
 }
 
+func loadCreds() (Credentials, error) {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	fmt.Println("Go-Twitter Bot v0.01")
+	fmt.Println(os.Getenv("ACCESS_TOKEN"))
+	creds := Credentials{
+		AccessToken:       os.Getenv("ACCESS_TOKEN"),
+		AccessTokenSecret: os.Getenv("ACCESS_TOKEN_SECRET"),
+		ConsumerKey:       os.Getenv("CONSUMER_KEY"),
+		ConsumerSecret:    os.Getenv("CONSUMER_SECRET"),
+	}
+	return creds, err
+}
+
 // getClient is a helper function that will return a twitter client
 // that we can subsequently use to send tweets, or to stream new tweets
 // this will take in a pointer to a Credential struct which will contain
@@ -51,30 +67,39 @@ func getClient(creds *Credentials) (*twitter.Client, error) {
 	return client, nil
 }
 
-func main() {
-	err := godotenv.Load()
+func sendTweet(c *twitter.Client, text string) {
+	tweet, resp, err := c.Statuses.Update(text, nil)
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println(err)
 	}
-	fmt.Println("Go-Twitter Bot v0.01")
-	fmt.Println(os.Getenv("ACCESS_TOKEN"))
-	creds := Credentials{
-		AccessToken:       os.Getenv("ACCESS_TOKEN"),
-		AccessTokenSecret: os.Getenv("ACCESS_TOKEN_SECRET"),
-		ConsumerKey:       os.Getenv("CONSUMER_KEY"),
-		ConsumerSecret:    os.Getenv("CONSUMER_SECRET"),
+	log.Printf("%+v\n", resp)
+	log.Printf("%+v\n", tweet)
+}
+
+func searchTweets(c *twitter.Client, query string) {
+	search, resp, err := c.Search.Tweets(&twitter.SearchTweetParams{
+		Query: query,
+	})
+
+	if err != nil {
+		log.Print(err)
 	}
 
-	fmt.Printf("%+v\n", creds)
+	log.Printf("%+v\n", resp)
+	log.Printf("%+v\n", search)
 
+}
+
+func main() {
+	creds, err := loadCreds()
 	client, err := getClient(&creds)
 	if err != nil {
 		log.Println("Error getting Twitter Client")
 		log.Println(err)
 	}
-
-	// Print out the pointer to our client
-	// for now so it doesn't throw errors
 	fmt.Printf("%+v\n", client)
-
+	fmt.Println("\n================================")
+	sendTweet(client, "third test tweet from #golang twitter bot")
+	fmt.Println("\n================================")
+	searchTweets(client, "#golang")
 }
