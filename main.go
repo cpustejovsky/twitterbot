@@ -25,8 +25,7 @@ func loadCreds() (Credentials, error) {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	fmt.Println("Go-Twitter Bot v0.01")
-	fmt.Println(os.Getenv("ACCESS_TOKEN"))
+	fmt.Println("Loading Credentials...")
 	creds := Credentials{
 		AccessToken:       os.Getenv("ACCESS_TOKEN"),
 		AccessTokenSecret: os.Getenv("ACCESS_TOKEN_SECRET"),
