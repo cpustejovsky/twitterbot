@@ -11,8 +11,8 @@ func main() {
 		fmt.Printf("Error getting Twitter Client:\n%v\n", err)
 		return
 	}
-	
-	n := []string{"yechielk", "FluffyHookers", "elpidophoros"}
+
+	n := []string{"FluffyHookers", "elpidophoros"}
 	c := make(chan User)
 	var u []User
 
