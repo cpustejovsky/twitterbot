@@ -11,13 +11,14 @@ func main() {
 		fmt.Printf("Error getting Twitter Client:\n%v\n", err)
 		return
 	}
+	
+	n := []string{"yechielk", "FluffyHookers", "elpidophoros"}
 	c := make(chan User)
-	go findUserTweets(client, "FluffyHookers", c)
-	go findUserTweets(client, "elpidophoros", c)
-	fh, el := <-c, <-c
-	fmt.Println("==============================================================")
-	fmt.Println(fh)
-	fmt.Println("==============================================================")
-	fmt.Println(el)
-	sendEmail()
+	var u []User
+
+	for _, name := range n {
+		go findUserTweets(client, name, c)
+		u = append(u, <-c)
+	}
+	sendEmail(u)
 }
