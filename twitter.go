@@ -28,14 +28,14 @@ type User struct {
 	tweets []UserTweet
 }
 
-func notGreek(tweet string) bool {
-	notGreek := true
+func greek(tweet string) bool {
+	greek := false
 	for _, char := range tweet {
 		if char >= 945 && char <= 1023 {
-			notGreek = false
+			greek = true
 		}
 	}
-	return notGreek
+	return greek
 }
 
 func loadCreds() (Credentials, error) {
@@ -91,8 +91,8 @@ func findUserTweets(client *twitter.Client, userName string, c chan User) {
 	}
 	u.name = tweets[0].User.Name
 	for _, tweet := range tweets {
-		notGreek := notGreek(tweet.FullText)
-		if notGreek == true {
+		greek := greek(tweet.FullText)
+		if greek == false {
 			ut := UserTweet{
 				text: tweet.FullText,
 				id:   tweet.IDStr,
