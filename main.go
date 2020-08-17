@@ -10,14 +10,22 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Credentials stores all of our access/consumer tokens
-// and secret keys needed for authentication against
-// the twitter REST API.
 type Credentials struct {
 	ConsumerKey       string
 	ConsumerSecret    string
 	AccessToken       string
 	AccessTokenSecret string
+}
+
+type UserTweet struct {
+	text string
+	id   string
+	link string
+}
+
+type User struct {
+	name   string
+	tweets []UserTweet
 }
 
 func notGreek(tweet string) bool {
@@ -45,73 +53,68 @@ func loadCreds() (Credentials, error) {
 	return creds, err
 }
 
-// getClient is a helper function that will return a twitter client
-// that we can subsequently use to send tweets, or to stream new tweets
-// this will take in a pointer to a Credential struct which will contain
-// everything needed to authenticate and return a pointer to a twitter Client
-// or an error
 func getClient(creds *Credentials) (*twitter.Client, error) {
-	// Pass in your consumer key (API Key) and your Consumer Secret (API Secret)
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
-	// Pass in your Access Token and your Access Token Secret
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
 
 	httpClient := config.Client(oauth1.NoContext, token)
 	client := twitter.NewClient(httpClient)
 
-	// Verify Credentials
 	verifyParams := &twitter.AccountVerifyParams{
 		SkipStatus:   twitter.Bool(true),
 		IncludeEmail: twitter.Bool(true),
 	}
 
-	// we can retrieve the user and verify if the credentials
-	// we have used successfully allow us to log in!
 	user, _, err := client.Accounts.VerifyCredentials(verifyParams)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("User's ACCOUNT:\n%+v\n", user)
+	log.Printf("\nGot %+v's Twitter Account\n", user.ScreenName)
 	return client, nil
 }
 
-func sendTweet(c *twitter.Client, text string) {
-	tweet, resp, err := c.Statuses.Update(text, nil)
-	if err != nil {
-		log.Println(err)
+func findUserTweets(c *twitter.Client, userName string) (User, error) {
+	params := &twitter.UserTimelineParams{
+		ScreenName: userName,
+		Count:      5,
+		TweetMode:  "extended",
 	}
-	log.Printf("%+v\n", resp)
-	log.Printf("%+v\n", tweet)
-}
-
-func searchTweets(c *twitter.Client, query string) {
-	search, resp, err := c.Search.Tweets(&twitter.SearchTweetParams{
-		Query: query,
-	})
-
-	if err != nil {
-		log.Print(err)
+	tweets, resp, err := c.Timelines.UserTimeline(params)
+	u := User{
+		name: userName,
 	}
-
-	log.Printf("%+v\n", resp)
-	log.Printf("%+v\n", search)
-
+	if err != nil && resp.StatusCode == 200 {
+		fmt.Println(resp.StatusCode)
+		fmt.Println(err)
+		return u, err
+	}
+	u.name = tweets[0].User.Name
+	for _, tweet := range tweets {
+		notGreek := notGreek(tweet.FullText)
+		if notGreek == true {
+			ut := UserTweet{
+				text: tweet.FullText,
+				id:   tweet.IDStr,
+				link: fmt.Sprintf("https://twitter.com/%v/status/%v", userName, tweet.IDStr),
+			}
+			u.tweets = append(u.tweets, ut)
+		}
+	}
+	return u, nil
 }
 
 func main() {
-	// creds, err := loadCreds()
-	// client, err := getClient(&creds)
-	// if err != nil {
-	// 	log.Println("Error getting Twitter Client")
-	// 	log.Println(err)
-	// }
-	// fmt.Printf("%+v\n", client)
-	// fmt.Println("\n================================")
-	// sendTweet(client, "third test tweet from #golang twitter bot")
-	// fmt.Println("\n================================")
-	// searchTweets(client, "#golang")
-
-	fmt.Println(notGreek("Ευγνώμων για την επανεκκίνηση της ανοικοδόμησης του Αγ. Νικολάου στο «Ground Zero» με τον @NYGovCuomo	. Αυτό το Εθνικό Ι. Προσκύνημα θα αποτελεί σύμβολο αγάπης, συμφιλίωσης, θρησκευτικής ελευθερίας και ελευθερίας της συνείδησης που δεν λειτουργεί με αποκλεισμούς, αλλά καλωσορίζει."))
-	fmt.Println(notGreek("You hear about #blockchain but don't quite get how it fits in an enterprise environment? 'Blockchain: Understanding its Uses and Implications' is a free training course from @linuxfoundation and @hyperledger that can help: https://bit.ly/3cbAv8C #learnlinux #distributedledger"))
+	creds, err := loadCreds()
+	client, err := getClient(&creds)
+	if err != nil {
+		log.Printf("Error getting Twitter Client:\n%v\n", err)
+		return
+	}
+	fmt.Println("==============================================================")
+	fh, _ := findUserTweets(client, "FluffyHookers")
+	fmt.Println(fh)
+	fmt.Println("==============================================================")
+	el, _ := findUserTweets(client, "elpidophoros")
+	fmt.Println(el)
 }
