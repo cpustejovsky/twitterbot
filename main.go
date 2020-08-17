@@ -19,4 +19,5 @@ func main() {
 	fmt.Println(fh)
 	fmt.Println("==============================================================")
 	fmt.Println(el)
+	sendEmail()
 }
