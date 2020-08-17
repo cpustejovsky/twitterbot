@@ -74,20 +74,20 @@ func getClient(creds *Credentials) (*twitter.Client, error) {
 	return client, nil
 }
 
-func findUserTweets(c *twitter.Client, userName string) (User, error) {
+func findUserTweets(client *twitter.Client, userName string, c chan User) {
 	params := &twitter.UserTimelineParams{
 		ScreenName: userName,
 		Count:      5,
 		TweetMode:  "extended",
 	}
-	tweets, resp, err := c.Timelines.UserTimeline(params)
+	tweets, resp, err := client.Timelines.UserTimeline(params)
 	u := User{
 		name: userName,
 	}
 	if err != nil && resp.StatusCode == 200 {
 		fmt.Println(resp.StatusCode)
 		fmt.Println(err)
-		return u, err
+		c <- u
 	}
 	u.name = tweets[0].User.Name
 	for _, tweet := range tweets {
@@ -101,7 +101,7 @@ func findUserTweets(c *twitter.Client, userName string) (User, error) {
 			u.tweets = append(u.tweets, ut)
 		}
 	}
-	return u, nil
+	c <- u
 }
 
 func main() {
@@ -111,10 +111,12 @@ func main() {
 		log.Printf("Error getting Twitter Client:\n%v\n", err)
 		return
 	}
+	c := make(chan User)
+	go findUserTweets(client, "FluffyHookers", c)
+	go findUserTweets(client, "elpidophoros", c)
+	fh, el := <-c, <-c
 	fmt.Println("==============================================================")
-	fh, _ := findUserTweets(client, "FluffyHookers")
 	fmt.Println(fh)
 	fmt.Println("==============================================================")
-	el, _ := findUserTweets(client, "elpidophoros")
 	fmt.Println(el)
 }
