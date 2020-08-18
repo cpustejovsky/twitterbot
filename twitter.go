@@ -38,10 +38,10 @@ func greek(tweet string) bool {
 	return false
 }
 
-func loadCreds() (Credentials, error) {
+func loadCreds() Credentials {
 	if os.Getenv("APP_ENV") != "production" {
 		if err := godotenv.Load(); err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 	}
 	fmt.Println("Loading Credentials...")
@@ -51,14 +51,11 @@ func loadCreds() (Credentials, error) {
 		ConsumerKey:       os.Getenv("TWITTER_CONSUMER_KEY"),
 		ConsumerSecret:    os.Getenv("TWITTER_CONSUMER_SECRET"),
 	}
-	return creds, err
+	return creds
 }
 
 func getClient() (*twitter.Client, error) {
-	creds, err1 := loadCreds()
-	if err1 != nil {
-		return nil, err1
-	}
+	creds := loadCreds()
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
 
