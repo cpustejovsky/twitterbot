@@ -34,7 +34,7 @@ func checkUsers(u []User) error {
 func setUpMailGun() *mailgun.MailgunImpl {
 	if os.Getenv("APP_ENV") != "production" {
 		if err := godotenv.Load(); err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 	}
 	mg, err := mailgun.NewMailgunFromEnv()
