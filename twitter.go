@@ -60,9 +60,9 @@ func getClient() (*twitter.Client, error) {
 		IncludeEmail: twitter.Bool(true),
 	}
 
-	_, _, err2 := client.Accounts.VerifyCredentials(verifyParams)
-	if err2 != nil {
-		return nil, err2
+	_, _, err := client.Accounts.VerifyCredentials(verifyParams)
+	if err != nil {
+		return nil, err
 	}
 
 	return client, nil

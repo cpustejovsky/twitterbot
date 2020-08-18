@@ -8,9 +8,9 @@ import (
 )
 
 func handleSendEmail(w http.ResponseWriter, r *http.Request) {
-	client, err1 := getClient()
-	if err1 != nil {
-		fmt.Printf("Error getting Twitter Client:\n%v\n", err1)
+	client, err := getClient()
+	if err != nil {
+		fmt.Printf("Error getting Twitter Client:\n%v\n", err)
 		return
 	}
 
@@ -23,9 +23,8 @@ func handleSendEmail(w http.ResponseWriter, r *http.Request) {
 		u = append(u, <-c)
 	}
 
-	err2 := sendEmail(u)
-	if err2 != nil {
-		fmt.Fprintf(w, "No email was sent.\n%v", err2)
+	if err := sendEmail(u); err != nil {
+		fmt.Fprintf(w, "No email was sent.\n%v", err)
 	}
 	fmt.Fprintf(w, "Email is being sent")
 }
