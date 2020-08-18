@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+
+	"github.com/joho/godotenv"
 )
 
 func handleSendEmail(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +37,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	enverr := godotenv.Load()
+	if enverr != nil {
+		fmt.Println(enverr)
+	}
 	http.HandleFunc("/run-twitter-bot", handleSendEmail)
 	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := os.Getenv("PORT")
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

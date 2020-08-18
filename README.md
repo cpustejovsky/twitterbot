@@ -11,12 +11,13 @@ TWITTER_ACCESS_TOKEN="your Twitter access token"
 TWITTER_ACCESS_TOKEN_SECRET="your Twitter access token secret"
 MG_API_KEY: "your MailGun private API key"
 MG_DOMAIN: "your MailGun email domain"
+PORT: "the port number you want to use on local"
 ```
 
 ## To Dos
+* Set up as a web app on a Heroku dyno that [dyno-waker](https://github.com/cpustejovsky/dyno-waker) can hit daily.
 * Add tests
 * Use `html/templates` for templating email body instead of string manipulation
-* Set up as a web app on a Heroku dyno that [dyno-waker](https://github.com/cpustejovsky/dyno-waker) can hit daily.
 * Pass in twitter usernames are parameters
 * Look into if it's possible for a twitter bot to like tweets on behalf of a user.
   * If Possible:
