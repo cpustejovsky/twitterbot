@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log"
@@ -12,28 +13,38 @@ import (
 
 func sendEmail(u []User) {
 	// Create an instance of the Mailgun Client
-	err := godotenv.Load()
+	enverr := godotenv.Load()
+	if enverr != nil {
+		fmt.Println(enverr)
+	}
 	mg, err := mailgun.NewMailgunFromEnv()
 	if err != nil {
 		fmt.Println(err)
 	}
 	sender := "twitter-updates@estuaryapp.com"
 	subject := "Twitter Updates"
-	body := "" //use template
+	html := ""
 	recipient := "charles.pustejovsky@gmail.com"
 
-	// Create a new template
+	m := mg.NewMessage(sender, subject, html, recipient)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//TODO: make use of html/templates for templating
+	var tweets bytes.Buffer
+	tweets.WriteString("<h1>Daily Tweet Update</h1>")
+	for _, user := range u {
+		tweets.WriteString("<h3>Tweets from" + user.name + "</h3><ul>")
+		for _, tweet := range user.tweets {
+			tweets.WriteString("<li>" + tweet.text + "<a target='_blank' rel='noopener noreferrer' href=" + tweet.link + "> (link)</a></li>")
+		}
+		tweets.WriteString("</ul>")
+	}
 
-	// The message object allows you to add attachments and Bcc recipients
+	m.SetHtml(tweets.String())
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
-
-	m := mg.NewMessage(sender, subject, body, recipient)
-	m.SetTemplate("my-template")
-
-	// Add the variables to be used by the template
-	m.AddVariable("title", "Testing How Users Look")
-	m.AddVariable("body", fmt.Sprintf("<ul><li>%v</li><li>%v</li></ul>", u[0].name, u[1].name))
 
 	resp, id, err := mg.Send(ctx, m)
 
