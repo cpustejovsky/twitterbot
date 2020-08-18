@@ -27,12 +27,13 @@ func handleSendEmail(w http.ResponseWriter, r *http.Request) {
 
 	if err := sendEmail(u); err != nil {
 		fmt.Fprintf(w, "No email was sent.\n%v", err)
+	} else {
+		fmt.Fprintf(w, "Email is being sent")
 	}
-	fmt.Fprintf(w, "Email is being sent")
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+	fmt.Fprintln(w, "Welcome to my Go Twitter Bot!")
 }
 
 func main() {
