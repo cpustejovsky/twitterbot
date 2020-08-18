@@ -18,9 +18,10 @@ type Credentials struct {
 }
 
 type UserTweet struct {
-	text string
-	id   string
-	link string
+	text  string
+	id    string
+	link  string
+	liked bool
 }
 
 type User struct {
@@ -54,7 +55,10 @@ func loadCreds() (Credentials, error) {
 }
 
 func getClient() (*twitter.Client, error) {
-	creds, err := loadCreds()
+	creds, err1 := loadCreds()
+	if err1 != nil {
+		return nil, err1
+	}
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
 
@@ -66,12 +70,11 @@ func getClient() (*twitter.Client, error) {
 		IncludeEmail: twitter.Bool(true),
 	}
 
-	user, _, err := client.Accounts.VerifyCredentials(verifyParams)
-	if err != nil {
-		return nil, err
+	_, _, err2 := client.Accounts.VerifyCredentials(verifyParams)
+	if err2 != nil {
+		return nil, err2
 	}
 
-	log.Printf("\nGot %+v's Twitter Account\n", user.ScreenName)
 	return client, nil
 }
 
@@ -94,6 +97,11 @@ func findUserTweets(client *twitter.Client, userName string, c chan User) {
 	for _, tweet := range tweets {
 		greek := greek(tweet.FullText)
 		if greek == false {
+			if tweet.Favorited == false {
+				var p twitter.FavoriteCreateParams
+				p.ID = tweet.ID
+				client.Favorites.Create(&p)
+			}
 			ut := UserTweet{
 				text: tweet.FullText,
 				id:   tweet.IDStr,

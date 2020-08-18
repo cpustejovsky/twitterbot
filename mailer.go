@@ -36,7 +36,7 @@ func sendEmail(u []User) {
 	for _, user := range u {
 		tweets.WriteString("<h3>Tweets from" + user.name + "</h3><ul>")
 		for _, tweet := range user.tweets {
-			tweets.WriteString("<li>" + tweet.text + "<a target='_blank' rel='noopener noreferrer' href=" + tweet.link + "> (link)</a></li>")
+			tweets.WriteString("<li>" + tweet.text + "\n<a target='_blank' rel='noopener noreferrer' href=" + tweet.link + ">(link)</a></li>")
 		}
 		tweets.WriteString("</ul>")
 	}
