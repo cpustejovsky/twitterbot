@@ -37,6 +37,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	fmt.Println(os.Getenv("APP_ENV"))
 	if os.Getenv("APP_ENV") != "production" {
 		if err := godotenv.Load(); err != nil {
 			log.Fatal(err)
@@ -44,6 +45,5 @@ func main() {
 	}
 	http.HandleFunc("/run-twitter-bot", handleSendEmail)
 	http.HandleFunc("/", handler)
-	port := os.Getenv("PORT")
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
