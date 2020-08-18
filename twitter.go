@@ -101,14 +101,15 @@ func findUserTweets(client *twitter.Client, userName string, c chan User) {
 				var p twitter.FavoriteCreateParams
 				p.ID = tweet.ID
 				client.Favorites.Create(&p)
+				ut := UserTweet{
+					text: tweet.FullText,
+					id:   tweet.IDStr,
+					link: fmt.Sprintf("https://twitter.com/%v/status/%v", userName, tweet.IDStr),
+				}
+				u.tweets = append(u.tweets, ut)
 			}
-			ut := UserTweet{
-				text: tweet.FullText,
-				id:   tweet.IDStr,
-				link: fmt.Sprintf("https://twitter.com/%v/status/%v", userName, tweet.IDStr),
-			}
-			u.tweets = append(u.tweets, ut)
 		}
 	}
+	fmt.Printf("found %v unliked tweets from %v\n", len(u.tweets), u.name)
 	c <- u
 }

@@ -12,6 +12,18 @@ import (
 )
 
 func sendEmail(u []User) {
+	emptys := 0
+	for _, user := range u {
+		fmt.Println(len(user.tweets))
+		if len(user.tweets) == 0 {
+			emptys++
+		}
+	}
+	fmt.Println(len(u))
+	if len(u) == emptys {
+		log.Fatal("no users to send email to.")
+	}
+	
 	// Create an instance of the Mailgun Client
 	enverr := godotenv.Load()
 	if enverr != nil {
@@ -52,5 +64,5 @@ func sendEmail(u []User) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("ID: %s Resp: %s\n", id, resp)
+	fmt.Printf("MailGun API:\nID: %s\nResp: %s\n", id, resp)
 }
