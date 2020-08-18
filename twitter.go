@@ -39,9 +39,10 @@ func greek(tweet string) bool {
 }
 
 func loadCreds() (Credentials, error) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if os.Getenv("APP_ENV") != "production" {
+		if err := godotenv.Load(); err != nil {
+			fmt.Println(err)
+		}
 	}
 	fmt.Println("Loading Credentials...")
 	creds := Credentials{

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -31,10 +32,10 @@ func checkUsers(u []User) error {
 }
 
 func setUpMailGun() *mailgun.MailgunImpl {
-	// Create an instance of the Mailgun Client
-	enverr := godotenv.Load()
-	if enverr != nil {
-		fmt.Println(enverr)
+	if os.Getenv("APP_ENV") != "production" {
+		if err := godotenv.Load(); err != nil {
+			fmt.Println(err)
+		}
 	}
 	mg, err := mailgun.NewMailgunFromEnv()
 	if err != nil {

@@ -37,9 +37,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	enverr := godotenv.Load()
-	if enverr != nil {
-		fmt.Println(enverr)
+	if os.Getenv("APP_ENV") != "production" {
+		if err := godotenv.Load(); err != nil {
+			fmt.Println(err)
+		}
 	}
 	http.HandleFunc("/run-twitter-bot", handleSendEmail)
 	http.HandleFunc("/", handler)
