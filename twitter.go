@@ -30,13 +30,12 @@ type User struct {
 }
 
 func greek(tweet string) bool {
-	greek := false
 	for _, char := range tweet {
 		if char >= 945 && char <= 1023 {
-			greek = true
+			return true
 		}
 	}
-	return greek
+	return false
 }
 
 func loadCreds() (Credentials, error) {

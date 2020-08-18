@@ -15,7 +15,7 @@ PORT: "the port number you want to use on local"
 ```
 
 ## To Dos
-* Set up as a web app on a Heroku dyno that [dyno-waker](https://github.com/cpustejovsky/dyno-waker) can hit daily.
+* ~~Set up as a web app on a Heroku dyno that [dyno-waker](https://github.com/cpustejovsky/dyno-waker) can hit daily.~~
 * Add tests
 * Use `html/templates` for templating email body instead of string manipulation
 * Pass in twitter usernames are parameters
