@@ -11,7 +11,13 @@ import (
 	"github.com/mailgun/mailgun-go/v4"
 )
 
-func checkUsers(u []User) {
+type EmptyError struct{}
+
+func (e *EmptyError) Error() string {
+	return "no users to send email to."
+}
+
+func checkUsers(u []User) error {
 	empties := 0
 	for _, user := range u {
 		if len(user.tweets) == 0 {
@@ -19,8 +25,9 @@ func checkUsers(u []User) {
 		}
 	}
 	if len(u) == empties {
-		log.Fatal("no users to send email to.")
+		return &EmptyError{}
 	}
+	return nil
 }
 
 func setUpMailGun() *mailgun.MailgunImpl {
@@ -54,8 +61,11 @@ func formatHtml(u []User, m *mailgun.Message) {
 	m.SetHtml(tweets.String())
 }
 
-func sendEmail(u []User) {
-	checkUsers(u)
+func sendEmail(u []User) error {
+	err := checkUsers(u)
+	if err != nil {
+		return err
+	}
 	mg := setUpMailGun()
 
 	sender := "twitter-updates@estuaryapp.com"
@@ -77,4 +87,5 @@ func sendEmail(u []User) {
 	}
 
 	fmt.Printf("MailGun API:\nID: %s\nResp: %s\n", id, resp)
+	return nil
 }
