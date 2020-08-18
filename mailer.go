@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/mailgun/mailgun-go/v4"
 )
 
@@ -31,6 +32,10 @@ func checkUsers(u []User) error {
 
 func setUpMailGun() *mailgun.MailgunImpl {
 	// Create an instance of the Mailgun Client
+	enverr := godotenv.Load()
+	if enverr != nil {
+		fmt.Println(enverr)
+	}
 	mg, err := mailgun.NewMailgunFromEnv()
 	if err != nil {
 		log.Fatal(err)

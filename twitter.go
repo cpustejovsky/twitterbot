@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+	"github.com/joho/godotenv"
 )
 
 type Credentials struct {
@@ -36,7 +38,11 @@ func greek(tweet string) bool {
 	return false
 }
 
-func loadCreds() Credentials {
+func loadCreds() (Credentials, error) {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	fmt.Println("Loading Credentials...")
 	creds := Credentials{
 		AccessToken:       os.Getenv("TWITTER_ACCESS_TOKEN"),
@@ -44,11 +50,14 @@ func loadCreds() Credentials {
 		ConsumerKey:       os.Getenv("TWITTER_CONSUMER_KEY"),
 		ConsumerSecret:    os.Getenv("TWITTER_CONSUMER_SECRET"),
 	}
-	return creds
+	return creds, err
 }
 
 func getClient() (*twitter.Client, error) {
-	creds := loadCreds()
+	creds, err1 := loadCreds()
+	if err1 != nil {
+		return nil, err1
+	}
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
 
