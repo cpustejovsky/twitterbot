@@ -12,18 +12,18 @@ import (
 )
 
 func sendEmail(u []User) {
-	emptys := 0
+	empties := 0
 	for _, user := range u {
 		fmt.Println(len(user.tweets))
 		if len(user.tweets) == 0 {
-			emptys++
+			empties++
 		}
 	}
 	fmt.Println(len(u))
-	if len(u) == emptys {
+	if len(u) == empties {
 		log.Fatal("no users to send email to.")
 	}
-	
+
 	// Create an instance of the Mailgun Client
 	enverr := godotenv.Load()
 	if enverr != nil {
