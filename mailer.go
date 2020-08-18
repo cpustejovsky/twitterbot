@@ -32,7 +32,7 @@ func checkUsers(u []User) error {
 }
 
 func setUpMailGun() *mailgun.MailgunImpl {
-	if os.Getenv("APP_ENV") != "production" {
+	if os.Getenv("PORT") == "" {
 		if err := godotenv.Load(); err != nil {
 			log.Fatal(err)
 		}

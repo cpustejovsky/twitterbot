@@ -39,7 +39,7 @@ func greek(tweet string) bool {
 }
 
 func loadCreds() Credentials {
-	if os.Getenv("APP_ENV") != "production" {
+	if os.Getenv("PORT") == "" {
 		if err := godotenv.Load(); err != nil {
 			log.Fatal(err)
 		}

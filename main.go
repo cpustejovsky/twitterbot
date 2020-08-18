@@ -37,8 +37,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fmt.Println(os.Getenv("APP_ENV"))
-	if os.Getenv("APP_ENV") != "production" {
+	if os.Getenv("PORT") == "" {
 		if err := godotenv.Load(); err != nil {
 			log.Fatal(err)
 		}
