@@ -53,7 +53,8 @@ func loadCreds() (Credentials, error) {
 	return creds, err
 }
 
-func getClient(creds *Credentials) (*twitter.Client, error) {
+func getClient() (*twitter.Client, error) {
+	creds, err := loadCreds()
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
 

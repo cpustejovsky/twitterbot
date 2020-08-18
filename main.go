@@ -5,8 +5,7 @@ import (
 )
 
 func main() {
-	creds, err := loadCreds()
-	client, err := getClient(&creds)
+	client, err := getClient()
 	if err != nil {
 		fmt.Printf("Error getting Twitter Client:\n%v\n", err)
 		return
