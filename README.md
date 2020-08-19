@@ -17,8 +17,10 @@ PORT: "the port number you want to use on local"
 ## To Dos
 * ~~Set up as a web app on a Heroku dyno that [dyno-waker](https://github.com/cpustejovsky/dyno-waker) can hit daily.~~
 * Add tests
+* Add information about unread notifications
+* Add information about unread messages
 * Use `html/templates` for templating email body instead of string manipulation
-* Pass in twitter usernames are parameters
+* Pass in twitter usernames as parameters
 * Look into if it's possible for a twitter bot to like tweets on behalf of a user.
   * If Possible:
     * Allow users to connect their Twitter account to estuaryapp.com
