@@ -1,6 +1,10 @@
 package bot
 
-import "testing"
+import (
+	"os"
+	"reflect"
+	"testing"
+)
 
 func TestGreek(t *testing.T) {
 
@@ -19,4 +23,21 @@ func TestGreek(t *testing.T) {
 
 		assertEqualBooleans(t, got, want)
 	})
+}
+
+func TestLoadCreds(t *testing.T) {
+	got := loadCreds()
+	want := Credentials{
+		AccessToken:       os.Getenv("TWITTER_ACCESS_TOKEN"),
+		AccessTokenSecret: os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"),
+		ConsumerKey:       os.Getenv("TWITTER_CONSUMER_KEY"),
+		ConsumerSecret:    os.Getenv("TWITTER_CONSUMER_SECRET"),
+	}
+	if !(reflect.DeepEqual(got, want)) {
+		t.Errorf("got %v want %v", got, want)
+	}
+}
+
+func TestGetClient(t *testing.T){
+	
 }
