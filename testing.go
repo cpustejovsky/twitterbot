@@ -1,6 +1,8 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func assertEqualBooleans(t *testing.T, got, want bool) {
 	if got != want {
