@@ -1,4 +1,4 @@
-package main
+package twitterBot
 
 import (
 	"fmt"
@@ -18,15 +18,15 @@ type Credentials struct {
 }
 
 type UserTweet struct {
-	text  string
-	id    string
-	link  string
-	liked bool
+	Text  string
+	Id    string
+	Link  string
+	Liked bool
 }
 
 type User struct {
-	name   string
-	tweets []UserTweet
+	Name   string
+	Tweets []UserTweet
 }
 
 func greek(tweet string) bool {
@@ -54,7 +54,7 @@ func loadCreds() Credentials {
 	return creds
 }
 
-func getClient() (*twitter.Client, error) {
+func GetClient() (*twitter.Client, error) {
 	creds := loadCreds()
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
@@ -75,7 +75,7 @@ func getClient() (*twitter.Client, error) {
 	return client, nil
 }
 
-func findUserTweets(client *twitter.Client, userName string, c chan User) {
+func FindUserTweets(client *twitter.Client, userName string, c chan User) {
 	params := &twitter.UserTimelineParams{
 		ScreenName: userName,
 		Count:      5,
@@ -83,14 +83,14 @@ func findUserTweets(client *twitter.Client, userName string, c chan User) {
 	}
 	tweets, resp, err := client.Timelines.UserTimeline(params)
 	u := User{
-		name: userName,
+		Name: userName,
 	}
 	if err != nil && resp.StatusCode == 200 {
 		fmt.Println(resp.StatusCode)
 		fmt.Println(err)
 		c <- u
 	}
-	u.name = tweets[0].User.Name
+	u.Name = tweets[0].User.Name
 	for _, tweet := range tweets {
 		greek := greek(tweet.FullText)
 		if greek == false {
@@ -99,14 +99,14 @@ func findUserTweets(client *twitter.Client, userName string, c chan User) {
 				p.ID = tweet.ID
 				client.Favorites.Create(&p)
 				ut := UserTweet{
-					text: tweet.FullText,
-					id:   tweet.IDStr,
-					link: fmt.Sprintf("https://twitter.com/%v/status/%v", userName, tweet.IDStr),
+					Text: tweet.FullText,
+					Id:   tweet.IDStr,
+					Link: fmt.Sprintf("https://twitter.com/%v/status/%v", userName, tweet.IDStr),
 				}
-				u.tweets = append(u.tweets, ut)
+				u.Tweets = append(u.Tweets, ut)
 			}
 		}
 	}
-	fmt.Printf("found %v unliked tweets from %v\n", len(u.tweets), u.name)
+	fmt.Printf("found %v unliked tweets from %v\n", len(u.Tweets), u.Name)
 	c <- u
 }
