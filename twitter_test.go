@@ -1,4 +1,4 @@
-package twitterBot
+package main
 
 import "testing"
 

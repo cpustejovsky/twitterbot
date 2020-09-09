@@ -1,4 +1,4 @@
-package twitterBot
+package main
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	"os"
 	"time"
 
-	bot "github.com/cpustejovsky/go_twitter_bot/bot"
 	"github.com/joho/godotenv"
 	"github.com/mailgun/mailgun-go/v4"
 )
@@ -19,10 +18,10 @@ func (e *EmptyError) Error() string {
 	return "no users to send email to."
 }
 
-func CheckUsers(u []bot.User) error {
+func checkUsers(u []User) error {
 	empties := 0
 	for _, user := range u {
-		if len(user.Tweets) == 0 {
+		if len(user.tweets) == 0 {
 			empties++
 		}
 	}
@@ -32,7 +31,7 @@ func CheckUsers(u []bot.User) error {
 	return nil
 }
 
-func SetUpMailGun() *mailgun.MailgunImpl {
+func setUpMailGun() *mailgun.MailgunImpl {
 	if os.Getenv("PORT") == "" {
 		if err := godotenv.Load(); err != nil {
 			log.Fatal(err)
@@ -45,17 +44,17 @@ func SetUpMailGun() *mailgun.MailgunImpl {
 	return mg
 }
 
-func formatHtml(u []bot.User, m *mailgun.Message) {
+func formatHtml(u []User, m *mailgun.Message) {
 	//TODO: make use of html/templates for templating
 	var tweets bytes.Buffer
 	tweets.WriteString("<h1>Daily Tweet Update</h1>")
 	for _, user := range u {
-		tweets.WriteString("<h3>Tweets from " + user.Name + "</h3><ul>")
-		if len(user.Tweets) == 0 {
+		tweets.WriteString("<h3>Tweets from " + user.name + "</h3><ul>")
+		if len(user.tweets) == 0 {
 			tweets.WriteString("<li>No new tweets.</li>")
 		}
-		for _, tweet := range user.Tweets {
-			tweets.WriteString("<li>" + tweet.Text + " <a target='_blank' rel='noopener noreferrer' href=" + tweet.Link + ">(link)</a></li>")
+		for _, tweet := range user.tweets {
+			tweets.WriteString("<li>" + tweet.text + " <a target='_blank' rel='noopener noreferrer' href=" + tweet.link + ">(link)</a></li>")
 		}
 		tweets.WriteString("</ul>")
 	}
@@ -63,12 +62,12 @@ func formatHtml(u []bot.User, m *mailgun.Message) {
 	m.SetHtml(tweets.String())
 }
 
-func SendEmail(u []bot.User) error {
-	err := CheckUsers(u)
+func sendEmail(u []User) error {
+	err := checkUsers(u)
 	if err != nil {
 		return err
 	}
-	mg := SetUpMailGun()
+	mg := setUpMailGun()
 
 	sender := "twitter-updates@estuaryapp.com"
 	subject := "Twitter Updates"
