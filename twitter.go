@@ -44,7 +44,6 @@ func loadCreds() Credentials {
 			log.Fatal(err)
 		}
 	}
-	fmt.Println("Loading Credentials...")
 	creds := Credentials{
 		AccessToken:       os.Getenv("TWITTER_ACCESS_TOKEN"),
 		AccessTokenSecret: os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"),
