@@ -9,9 +9,7 @@ func TestGreek(t *testing.T) {
 		got := greek(englishTxt)
 		want := false
 
-		if got != want {
-			t.Errorf("got %v want %v", got, want)
-		}
+		assertEqualBooleans(t, got, want)
 	})
 
 	t.Run("returns true for Greek in text", func(t *testing.T) {
@@ -19,8 +17,6 @@ func TestGreek(t *testing.T) {
 		got := greek(greekTxt)
 		want := true
 
-		if got != want {
-			t.Errorf("got %v want %v", got, want)
-		}
+		assertEqualBooleans(t, got, want)
 	})
 }
