@@ -1,4 +1,4 @@
-package main
+package bot
 
 import (
 	"bytes"
@@ -62,7 +62,7 @@ func formatHtml(u []User, m *mailgun.Message) {
 	m.SetHtml(tweets.String())
 }
 
-func sendEmail(u []User) error {
+func SendEmail(u []User) error {
 	err := checkUsers(u)
 	if err != nil {
 		return err

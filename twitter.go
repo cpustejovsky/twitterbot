@@ -1,4 +1,4 @@
-package main
+package bot
 
 import (
 	"fmt"
@@ -54,7 +54,7 @@ func loadCreds() Credentials {
 	return creds
 }
 
-func getClient() (*twitter.Client, error) {
+func GetClient() (*twitter.Client, error) {
 	creds := loadCreds()
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
@@ -75,7 +75,7 @@ func getClient() (*twitter.Client, error) {
 	return client, nil
 }
 
-func findUserTweets(client *twitter.Client, userName string, c chan User) {
+func FindUserTweets(client *twitter.Client, userName string, c chan User) {
 	params := &twitter.UserTimelineParams{
 		ScreenName: userName,
 		Count:      5,
