@@ -4,11 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
-	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/mailgun/mailgun-go/v4"
 )
 
@@ -31,19 +28,6 @@ func checkUsers(u []User) error {
 	return nil
 }
 
-func setUpMailGun() *mailgun.MailgunImpl {
-	if os.Getenv("PORT") == "" {
-		if err := godotenv.Load(); err != nil {
-			log.Fatal(err)
-		}
-	}
-	mg, err := mailgun.NewMailgunFromEnv()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return mg
-}
-
 func formatHtml(u []User, m *mailgun.Message) {
 	//TODO: make use of html/templates for templating
 	var tweets bytes.Buffer
@@ -62,13 +46,11 @@ func formatHtml(u []User, m *mailgun.Message) {
 	m.SetHtml(tweets.String())
 }
 
-func (tb *TwitterBot) SendEmail() error {
+func (tb *TwitterBot) SendEmail(mg *mailgun.MailgunImpl) error {
 	err := checkUsers(tb.users)
 	if err != nil {
 		return err
 	}
-	mg := setUpMailGun()
-
 	sender := "twitter-updates@estuaryapp.com"
 	subject := "Twitter Updates"
 	html := ""
@@ -84,7 +66,7 @@ func (tb *TwitterBot) SendEmail() error {
 	resp, id, err := mg.Send(ctx, m)
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fmt.Printf("MailGun API:\nID: %s\nResp: %s\n", id, resp)

@@ -2,20 +2,10 @@ package bot
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-	"github.com/joho/godotenv"
 )
-
-type credentials struct {
-	ConsumerKey       string
-	ConsumerSecret    string
-	AccessToken       string
-	AccessTokenSecret string
-}
 
 type userTweet struct {
 	text  string
@@ -34,8 +24,14 @@ type TwitterBot struct {
 	users  []User
 }
 
-func NewBot() (TwitterBot, error) {
-	creds := loadCreds()
+type Credentials struct {
+	ConsumerKey       string
+	ConsumerSecret    string
+	AccessToken       string
+	AccessTokenSecret string
+}
+
+func NewBot(creds Credentials) (TwitterBot, error) {
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
 
@@ -49,7 +45,6 @@ func NewBot() (TwitterBot, error) {
 
 	_, _, err := client.Accounts.VerifyCredentials(verifyParams)
 	if err != nil {
-		log.Fatal(err)
 		return TwitterBot{}, err
 	}
 	tb := &TwitterBot{}
@@ -87,21 +82,6 @@ func greek(tweet string) bool {
 		}
 	}
 	return false
-}
-
-func loadCreds() credentials {
-	if os.Getenv("PORT") == "" {
-		if err := godotenv.Load(); err != nil {
-			log.Fatal(err)
-		}
-	}
-	creds := credentials{
-		AccessToken:       os.Getenv("TWITTER_ACCESS_TOKEN"),
-		AccessTokenSecret: os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"),
-		ConsumerKey:       os.Getenv("TWITTER_CONSUMER_KEY"),
-		ConsumerSecret:    os.Getenv("TWITTER_CONSUMER_SECRET"),
-	}
-	return creds
 }
 
 func (tb *TwitterBot) modifyAndAddTweetsToUser(u User, tweets []twitter.Tweet) User {
