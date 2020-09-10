@@ -10,14 +10,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type Credentials struct {
+type credentials struct {
 	ConsumerKey       string
 	ConsumerSecret    string
 	AccessToken       string
 	AccessTokenSecret string
 }
 
-type UserTweet struct {
+type userTweet struct {
 	text  string
 	id    string
 	link  string
@@ -26,11 +26,12 @@ type UserTweet struct {
 
 type User struct {
 	name   string
-	tweets []UserTweet
+	tweets []userTweet
 }
 
 type TwitterBot struct {
 	client *twitter.Client
+	users  []User
 }
 
 func NewBot() (TwitterBot, error) {
@@ -56,30 +57,6 @@ func NewBot() (TwitterBot, error) {
 	return *tb, nil
 }
 
-func greek(tweet string) bool {
-	for _, char := range tweet {
-		if char >= 945 && char <= 1023 {
-			return true
-		}
-	}
-	return false
-}
-
-func loadCreds() Credentials {
-	if os.Getenv("PORT") == "" {
-		if err := godotenv.Load(); err != nil {
-			log.Fatal(err)
-		}
-	}
-	creds := Credentials{
-		AccessToken:       os.Getenv("TWITTER_ACCESS_TOKEN"),
-		AccessTokenSecret: os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"),
-		ConsumerKey:       os.Getenv("TWITTER_CONSUMER_KEY"),
-		ConsumerSecret:    os.Getenv("TWITTER_CONSUMER_SECRET"),
-	}
-	return creds
-}
-
 func (tb *TwitterBot) FindUserTweets(userName string, c chan User) {
 	params := &twitter.UserTimelineParams{
 		ScreenName: userName,
@@ -95,20 +72,48 @@ func (tb *TwitterBot) FindUserTweets(userName string, c chan User) {
 		fmt.Println(err)
 		c <- u
 	}
-	u = tb.ModifyAndAddTweetsToUser(u, tweets)
+	u = tb.modifyAndAddTweetsToUser(u, tweets)
 	c <- u
 }
 
-func (tb *TwitterBot) ModifyAndAddTweetsToUser(u User, tweets []twitter.Tweet) User {
+func (tb *TwitterBot) AddUsers(c chan User) {
+	tb.users = append(tb.users, <-c)
+}
+
+func greek(tweet string) bool {
+	for _, char := range tweet {
+		if char >= 945 && char <= 1023 {
+			return true
+		}
+	}
+	return false
+}
+
+func loadCreds() credentials {
+	if os.Getenv("PORT") == "" {
+		if err := godotenv.Load(); err != nil {
+			log.Fatal(err)
+		}
+	}
+	creds := credentials{
+		AccessToken:       os.Getenv("TWITTER_ACCESS_TOKEN"),
+		AccessTokenSecret: os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"),
+		ConsumerKey:       os.Getenv("TWITTER_CONSUMER_KEY"),
+		ConsumerSecret:    os.Getenv("TWITTER_CONSUMER_SECRET"),
+	}
+	return creds
+}
+
+func (tb *TwitterBot) modifyAndAddTweetsToUser(u User, tweets []twitter.Tweet) User {
 	for _, tweet := range tweets {
 		prevLiked := true
 		greek := greek(tweet.FullText)
 		if greek == false {
 			if tweet.Favorited == false {
-				tb.LikeTweet(tweet)
+				tb.likeTweet(tweet)
 				prevLiked = true
 			}
-			ut := UserTweet{
+			ut := userTweet{
 				text:  tweet.FullText,
 				id:    tweet.IDStr,
 				link:  fmt.Sprintf("https://twitter.com/%v/status/%v", u.name, tweet.IDStr),
@@ -121,7 +126,7 @@ func (tb *TwitterBot) ModifyAndAddTweetsToUser(u User, tweets []twitter.Tweet) U
 	return u
 }
 
-func (tb *TwitterBot) LikeTweet(tweet twitter.Tweet) {
+func (tb *TwitterBot) likeTweet(tweet twitter.Tweet) {
 	var p twitter.FavoriteCreateParams
 	p.ID = tweet.ID
 	tb.client.Favorites.Create(&p)

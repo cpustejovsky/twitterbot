@@ -11,18 +11,16 @@ import (
 )
 
 func handleSendEmail(w http.ResponseWriter, r *http.Request) {
-	tb, _ := t.NewBot()
-
 	n := []string{"FluffyHookers", "elpidophoros"}
 	c := make(chan t.User)
-	var u []t.User
+	tb, _ := t.NewBot()
 
 	for _, name := range n {
 		go tb.FindUserTweets(name, c)
-		u = append(u, <-c)
+		tb.AddUsers(c)
 	}
 
-	if err := t.SendEmail(u); err != nil {
+	if err := tb.SendEmail(); err != nil {
 		fmt.Fprintf(w, "No email was sent.\n%v", err)
 	} else {
 		fmt.Fprintf(w, "Email is being sent")
@@ -34,6 +32,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	//TODO: move all fatal logs to main function or at least the handlers?
+	//TODO: log all errors to a /tmp/error.log file and all info to a /tmp/info.log
 	if os.Getenv("PORT") == "" {
 		if err := godotenv.Load(); err != nil {
 			log.Fatal(err)
