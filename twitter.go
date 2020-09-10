@@ -33,7 +33,7 @@ type TwitterBot struct {
 	client *twitter.Client
 }
 
-func (tb *TwitterBot) newBot() error {
+func NewBot() (TwitterBot, error) {
 	creds := loadCreds()
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
@@ -49,10 +49,11 @@ func (tb *TwitterBot) newBot() error {
 	_, _, err := client.Accounts.VerifyCredentials(verifyParams)
 	if err != nil {
 		log.Fatal(err)
-		return err
+		return TwitterBot{}, err
 	}
+	tb := &TwitterBot{}
 	tb.client = client
-	return nil
+	return *tb, nil
 }
 
 func greek(tweet string) bool {

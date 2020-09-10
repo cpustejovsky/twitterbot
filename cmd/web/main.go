@@ -6,27 +6,23 @@ import (
 	"net/http"
 	"os"
 
-	bot "github.com/cpustejovsky/go_twitter_bot"
+	t "github.com/cpustejovsky/go_twitter_bot"
 	"github.com/joho/godotenv"
 )
 
 func handleSendEmail(w http.ResponseWriter, r *http.Request) {
-	client, err := bot.GetClient()
-	if err != nil {
-		fmt.Printf("Error getting Twitter Client:\n%v\n", err)
-		return
-	}
+	tb, _ := t.NewBot()
 
 	n := []string{"FluffyHookers", "elpidophoros"}
-	c := make(chan bot.User)
-	var u []bot.User
+	c := make(chan t.User)
+	var u []t.User
 
 	for _, name := range n {
-		go bot.FindUserTweets(client, name, c)
+		go tb.FindUserTweets(name, c)
 		u = append(u, <-c)
 	}
 
-	if err := bot.SendEmail(u); err != nil {
+	if err := t.SendEmail(u); err != nil {
 		fmt.Fprintf(w, "No email was sent.\n%v", err)
 	} else {
 		fmt.Fprintf(w, "Email is being sent")
