@@ -6,18 +6,12 @@ import (
 	"net/http"
 
 	t "github.com/cpustejovsky/go_twitter_bot"
-	"github.com/mailgun/mailgun-go/v4"
 )
 
-type Bot struct {
-	creds      t.Credentials
-	mgInstance *mailgun.MailgunImpl
-}
-
-func (b *Bot) handleSendEmail(w http.ResponseWriter, r *http.Request) {
+func (app *application) handleSendEmail(w http.ResponseWriter, r *http.Request) {
 	n := []string{"FluffyHookers", "elpidophoros"}
 	c := make(chan t.User)
-	tb, err := t.NewBot(b.creds)
+	tb, err := t.NewBot(app.creds)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,7 +20,7 @@ func (b *Bot) handleSendEmail(w http.ResponseWriter, r *http.Request) {
 		tb.AddUsers(c)
 	}
 
-	if err := tb.SendEmail(b.mgInstance); err != nil {
+	if err := tb.SendEmail(app.mgInstance); err != nil {
 		fmt.Fprintf(w, "No email was sent.\n%v", err)
 	} else {
 		fmt.Fprintf(w, "Email is being sent")

@@ -24,14 +24,14 @@ type TwitterBot struct {
 	users  []User
 }
 
-type Credentials struct {
+type TwitterCredentials struct {
 	ConsumerKey       string
 	ConsumerSecret    string
 	AccessToken       string
 	AccessTokenSecret string
 }
 
-func NewBot(creds Credentials) (TwitterBot, error) {
+func NewBot(creds TwitterCredentials) (TwitterBot, error) {
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
 
