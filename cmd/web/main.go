@@ -1,16 +1,24 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	t "github.com/cpustejovsky/go_twitter_bot"
 	"github.com/joho/godotenv"
 	"github.com/mailgun/mailgun-go/v4"
 )
 
+type Config struct {
+	Addr string
+}
+
 type application struct {
+	errorLog   *log.Logger
+	infoLog    *log.Logger
 	creds      t.TwitterCredentials
 	mgInstance *mailgun.MailgunImpl
 }
@@ -23,6 +31,14 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+	cfg := new(Config)
+	flag.StringVar(&cfg.Addr, "addr", ":4000", "HTTP network address")
+
+	flag.Parse()
+
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.LUTC|log.Llongfile)
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.LUTC)
+
 	creds := t.TwitterCredentials{
 		AccessToken:       os.Getenv("TWITTER_ACCESS_TOKEN"),
 		AccessTokenSecret: os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"),
@@ -37,10 +53,21 @@ func main() {
 
 	app := &application{
 		creds:      creds,
+		errorLog:   errorLog,
+		infoLog:    infoLog,
 		mgInstance: mgInstance,
 	}
 
-	http.HandleFunc("/run-twitter-bot", app.handleSendEmail)
-	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
+	srv := &http.Server{
+		Addr:         cfg.Addr,
+		ErrorLog:     errorLog,
+		Handler:      app.routes(),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	infoLog.Printf("Starting server on %s", cfg.Addr)
+	err = srv.ListenAndServe()
+	errorLog.Fatal(err)
 }
