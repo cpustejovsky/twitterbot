@@ -8,6 +8,9 @@ import (
 	t "github.com/cpustejovsky/go_twitter_bot"
 )
 
+//TODO: make this just handle http, not the bot stuff.
+// possibly pass in the string of usernames in the app config in main.go and pass into something else
+// this could all be a single function the bot has somewhere?
 func (app *application) handleSendEmail(w http.ResponseWriter, r *http.Request) {
 	n := []string{"FluffyHookers", "elpidophoros"}
 	c := make(chan t.User)
@@ -27,6 +30,6 @@ func (app *application) handleSendEmail(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func home(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome to my Go Twitter Bot!")
 }
