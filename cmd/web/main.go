@@ -24,7 +24,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	port := os.Getenv("PORT")
+	port := ":" + os.Getenv("PORT")
 
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.LUTC|log.Llongfile)
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.LUTC)
