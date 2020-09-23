@@ -13,7 +13,7 @@ import (
 )
 
 type Config struct {
-	Addr string
+	Port string
 }
 
 type application struct {
@@ -29,12 +29,11 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	port := ":" + os.Getenv("PORT")
 	cfg := new(Config)
-	flag.StringVar(&cfg.Addr, "addr", port, "HTTP network address")
+	flag.StringVar(&cfg.Port, "port", os.Getenv("PORT"), "Port number")
 
 	flag.Parse()
-
+	address := ":" + cfg.Port
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.LUTC|log.Llongfile)
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.LUTC)
 
@@ -58,7 +57,7 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:         cfg.Addr,
+		Addr:         address,
 		ErrorLog:     errorLog,
 		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
@@ -66,7 +65,7 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	infoLog.Printf("Starting server on %s", cfg.Addr)
+	infoLog.Printf("Starting server on %s", address)
 	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
