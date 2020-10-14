@@ -1,4 +1,4 @@
-module github.com/cpustejovsky/go_twitter_bot
+module github.com/cpustejovsky/twitter_bot
 
 go 1.13
 
