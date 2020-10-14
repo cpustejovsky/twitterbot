@@ -46,7 +46,7 @@ func formatHtml(u []User, m *mailgun.Message) {
 	m.SetHtml(tweets.String())
 }
 
-func (tb *TwitterBot) SendEmail(mg *mailgun.MailgunImpl) error {
+func (tb *TwitterBot) SendEmail(mg *mailgun.MailgunImpl, recipient string) error {
 	err := checkUsers(tb.users)
 	if err != nil {
 		return err
@@ -54,7 +54,6 @@ func (tb *TwitterBot) SendEmail(mg *mailgun.MailgunImpl) error {
 	sender := "twitter-updates@estuaryapp.com"
 	subject := "Twitter Updates"
 	html := ""
-	recipient := "charles.pustejovsky@gmail.com"
 
 	m := mg.NewMessage(sender, subject, html, recipient)
 
