@@ -28,11 +28,11 @@ if err != nil {
 }
 ```
 
-And pass in `creds` and `mg` along with a slice of Twitter usernames and a recipient email address.
+And pass in `creds` and `mg` along with a slice of Twitter usernames, the number of tweets you want to check, and a recipient email address.
 
 **Example:**
 ```go
-err := bot.EmailUnreadTweets(creds, mg, []string{"FluffyHookers", "elpidophoros"}, "charles.pustejovsky@gmail.com")
+err := bot.EmailUnreadTweets(creds, mg, []string{"FluffyHookers", "elpidophoros"}, 5, "charles.pustejovsky@gmail.com")
 if err != nil {
   log.Fatal(err)
 }
