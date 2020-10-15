@@ -12,7 +12,7 @@ import (
 type EmptyError struct{}
 
 func (e *EmptyError) Error() string {
-	return "no users to send email to."
+	return "No new tweets for queried users."
 }
 
 func checkUsers(u []User) error {
@@ -33,14 +33,13 @@ func formatHtml(u []User, m *mailgun.Message) {
 	var tweets bytes.Buffer
 	tweets.WriteString("<h1>Daily Tweet Update</h1>")
 	for _, user := range u {
-		tweets.WriteString("<h3>Tweets from " + user.name + "</h3><ul>")
-		if len(user.tweets) == 0 {
-			tweets.WriteString("<li>No new tweets.</li>")
+		if len(user.tweets) > 0 {
+			tweets.WriteString("<h3>Tweets from " + user.name + "</h3><ul>")
+			for _, tweet := range user.tweets {
+				tweets.WriteString("<li>" + tweet.text + " <a target='_blank' rel='noopener noreferrer' href=" + tweet.link + ">(link)</a></li>")
+			}
+			tweets.WriteString("</ul>")
 		}
-		for _, tweet := range user.tweets {
-			tweets.WriteString("<li>" + tweet.text + " <a target='_blank' rel='noopener noreferrer' href=" + tweet.link + ">(link)</a></li>")
-		}
-		tweets.WriteString("</ul>")
 	}
 
 	m.SetHtml(tweets.String())
