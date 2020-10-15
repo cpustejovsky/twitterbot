@@ -50,6 +50,7 @@ func (tb *TwitterBot) SendEmail(mg *mailgun.MailgunImpl, recipient string) error
 	if err != nil {
 		return err
 	}
+	//TODO: Add customization for Twitter Bot
 	sender := "twitter-updates@estuaryapp.com"
 	subject := "Twitter Updates"
 	html := ""
