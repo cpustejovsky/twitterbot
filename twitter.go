@@ -54,26 +54,14 @@ func NewBot(creds TwitterCredentials) (TwitterBot, error) {
 	return *tb, nil
 }
 
-// creds := t.TwitterCredentials{
-// 	AccessToken:       os.Getenv("TWITTER_ACCESS_TOKEN"),
-// 	AccessTokenSecret: os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"),
-// 	ConsumerKey:       os.Getenv("TWITTER_CONSUMER_KEY"),
-// 	ConsumerSecret:    os.Getenv("TWITTER_CONSUMER_SECRET"),
-// }
-// mg, err := mailgun.NewMailgunFromEnv()
-// if err != nil {
-// 	log.Fatal(err)
-// }
-
 //EmailUnreadTweets takes Twitter API credentials, a MailGun implementation, a slice of Twitter usernames, and a count of how many tweets to check and sends emails of unread tweets to the recipient's email address
 func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNames []string, count int, recipient string) error {
-	n := []string{"FluffyHookers", "elpidophoros"}
 	c := make(chan User)
 	tb, err := NewBot(creds)
 	if err != nil {
 		return err
 	}
-	for _, name := range n {
+	for _, name := range userNames {
 		go tb.FindUserTweets(name, c, count)
 		tb.AddUsers(c)
 	}
