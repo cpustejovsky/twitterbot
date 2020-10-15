@@ -98,19 +98,9 @@ func (tb *TwitterBot) AddUsers(c chan User) {
 	tb.users = append(tb.users, <-c)
 }
 
-func greek(tweet string) bool {
-	for _, char := range tweet {
-		if char >= 945 && char <= 1023 {
-			return true
-		}
-	}
-	return false
-}
-
 func (tb *TwitterBot) modifyAndAddTweetsToUser(u User, tweets []twitter.Tweet) User {
 	for _, tweet := range tweets {
-		greek := greek(tweet.FullText)
-		if greek == false && tweet.Favorited == false {
+		if tweet.Favorited == false {
 			tb.likeTweet(tweet)
 			ut := userTweet{
 				text: tweet.FullText,
