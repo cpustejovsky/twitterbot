@@ -27,8 +27,9 @@ if err != nil {
 	log.Fatal(err)
 }
 ```
+## Use
 
-And pass in `creds` and `mg` along with a slice of Twitter usernames, the number of tweets you want to check, and a recipient email address.
+Pass in `creds` and `mg` along with a slice of Twitter usernames, the number of tweets you want to check, and a recipient email address.
 
 **Example:**
 ```go
