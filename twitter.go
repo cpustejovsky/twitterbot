@@ -110,16 +110,14 @@ func greek(tweet string) bool {
 func (tb *TwitterBot) modifyAndAddTweetsToUser(u User, tweets []twitter.Tweet) User {
 	for _, tweet := range tweets {
 		greek := greek(tweet.FullText)
-		if greek == false {
-			if tweet.Favorited == false {
-				tb.likeTweet(tweet)
-				ut := userTweet{
-					text: tweet.FullText,
-					id:   tweet.IDStr,
-					link: fmt.Sprintf("https://twitter.com/%v/status/%v", u.name, tweet.IDStr),
-				}
-				u.tweets = append(u.tweets, ut)
+		if greek == false && tweet.Favorited == false {
+			tb.likeTweet(tweet)
+			ut := userTweet{
+				text: tweet.FullText,
+				id:   tweet.IDStr,
+				link: fmt.Sprintf("https://twitter.com/%v/status/%v", u.name, tweet.IDStr),
 			}
+			u.tweets = append(u.tweets, ut)
 		}
 	}
 	u.name = tweets[0].User.Name
