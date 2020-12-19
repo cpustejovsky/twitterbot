@@ -61,6 +61,7 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 	if err != nil {
 		return err
 	}
+
 	var wg sync.WaitGroup
 
 	for _, name := range userNames {
@@ -72,9 +73,9 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 
 	if err := tb.SendEmail(mg, recipient); err != nil {
 		return err
-	} else {
-		return nil
 	}
+
+	return nil
 }
 
 //FindUserTweets takes finds count tweets for userName and passes a User struct to channel
