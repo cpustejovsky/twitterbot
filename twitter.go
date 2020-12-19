@@ -34,7 +34,7 @@ type TwitterCredentials struct {
 }
 
 //NewBot creates a twitter bot based on Twitter API credentials
-func NewBot(creds TwitterCredentials) (TwitterBot, error) {
+func newBot(creds TwitterCredentials) (TwitterBot, error) {
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
 
@@ -57,7 +57,7 @@ func NewBot(creds TwitterCredentials) (TwitterBot, error) {
 
 //EmailUnreadTweets takes Twitter API credentials, a MailGun implementation, a slice of Twitter usernames, and a count of how many tweets to check and sends emails of unread tweets to the recipient's email address
 func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNames []string, count int, recipient string) error {
-	tb, err := NewBot(creds)
+	tb, err := newBot(creds)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 
 	for _, name := range userNames {
 		wg.Add(1)
-		go tb.FindUserTweets(&wg, name, count)
+		go tb.findUserTweets(&wg, name, count)
 	}
 
 	wg.Wait()
@@ -79,7 +79,7 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 }
 
 //FindUserTweets takes finds count tweets for userName and passes a User struct to channel
-func (tb *TwitterBot) FindUserTweets(wg *sync.WaitGroup, userName string, count int) {
+func (tb *TwitterBot) findUserTweets(wg *sync.WaitGroup, userName string, count int) {
 	defer wg.Done()
 
 	params := &twitter.UserTimelineParams{
