@@ -57,7 +57,6 @@ func NewBot(creds TwitterCredentials) (TwitterBot, error) {
 
 //EmailUnreadTweets takes Twitter API credentials, a MailGun implementation, a slice of Twitter usernames, and a count of how many tweets to check and sends emails of unread tweets to the recipient's email address
 func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNames []string, count int, recipient string) error {
-	c := make(chan User)
 	tb, err := NewBot(creds)
 	if err != nil {
 		return err
@@ -98,11 +97,6 @@ func (tb *TwitterBot) FindUserTweets(wg *sync.WaitGroup, userName string, count 
 	}
 	u = tb.modifyAndAddTweetsToUser(u, tweets)
 	tb.users = append(tb.users, u)
-}
-
-//AddUsers takes a user channel and appends it to the twitter bots users slice
-func (tb *TwitterBot) AddUsers(c chan User) {
-	tb.users = append(tb.users, <-c)
 }
 
 func (tb *TwitterBot) modifyAndAddTweetsToUser(u User, tweets []twitter.Tweet) User {
