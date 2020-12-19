@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -61,10 +62,14 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 	if err != nil {
 		return err
 	}
+	var wg sync.WaitGroup
+
 	for _, name := range userNames {
-		go tb.FindUserTweets(name, c, count)
-		tb.AddUsers(c)
+		wg.Add(1)
+		go tb.FindUserTweets(&wg, name, 5)
 	}
+
+	wg.Wait()
 
 	if err := tb.SendEmail(mg, recipient); err != nil {
 		return err
@@ -74,7 +79,9 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 }
 
 //FindUserTweets takes finds count tweets for userName and passes a User struct to channel
-func (tb *TwitterBot) FindUserTweets(userName string, c chan User, count int) {
+func (tb *TwitterBot) FindUserTweets(wg *sync.WaitGroup, userName string, count int) {
+	defer wg.Done()
+
 	params := &twitter.UserTimelineParams{
 		ScreenName: userName,
 		Count:      count,
@@ -87,10 +94,10 @@ func (tb *TwitterBot) FindUserTweets(userName string, c chan User, count int) {
 	if err != nil && resp.StatusCode == 200 {
 		fmt.Println(resp.StatusCode)
 		fmt.Println(err)
-		c <- u
+		return
 	}
 	u = tb.modifyAndAddTweetsToUser(u, tweets)
-	c <- u
+	tb.users = append(tb.users, u)
 }
 
 //AddUsers takes a user channel and appends it to the twitter bots users slice
