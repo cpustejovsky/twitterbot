@@ -65,7 +65,7 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 
 	for _, name := range userNames {
 		wg.Add(1)
-		go tb.FindUserTweets(&wg, name, 5)
+		go tb.FindUserTweets(&wg, name, count)
 	}
 
 	wg.Wait()
