@@ -33,28 +33,6 @@ type TwitterCredentials struct {
 	AccessTokenSecret string
 }
 
-//NewBot creates a twitter bot based on Twitter API credentials
-func newBot(creds TwitterCredentials) (TwitterBot, error) {
-	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
-	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
-
-	httpClient := config.Client(oauth1.NoContext, token)
-	client := twitter.NewClient(httpClient)
-
-	verifyParams := &twitter.AccountVerifyParams{
-		SkipStatus:   twitter.Bool(true),
-		IncludeEmail: twitter.Bool(true),
-	}
-
-	_, _, err := client.Accounts.VerifyCredentials(verifyParams)
-	if err != nil {
-		return TwitterBot{}, err
-	}
-	tb := &TwitterBot{}
-	tb.client = client
-	return *tb, nil
-}
-
 //EmailUnreadTweets takes Twitter API credentials, a MailGun implementation, a slice of Twitter usernames, and a count of how many tweets to check and sends emails of unread tweets to the recipient's email address
 func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNames []string, count int, recipient string) error {
 	tb, err := newBot(creds)
@@ -76,6 +54,28 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 	}
 
 	return nil
+}
+
+//NewBot creates a twitter bot based on Twitter API credentials
+func newBot(creds TwitterCredentials) (TwitterBot, error) {
+	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
+	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
+
+	httpClient := config.Client(oauth1.NoContext, token)
+	client := twitter.NewClient(httpClient)
+
+	verifyParams := &twitter.AccountVerifyParams{
+		SkipStatus:   twitter.Bool(true),
+		IncludeEmail: twitter.Bool(true),
+	}
+
+	_, _, err := client.Accounts.VerifyCredentials(verifyParams)
+	if err != nil {
+		return TwitterBot{}, err
+	}
+	tb := &TwitterBot{}
+	tb.client = client
+	return *tb, nil
 }
 
 //FindUserTweets takes finds count tweets for userName and passes a User struct to channel

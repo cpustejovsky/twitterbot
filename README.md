@@ -16,7 +16,13 @@ PORT: "the port number you want to use on local"
 
 Then to add these to `bot.EmailUnreadTweets()` use that information to create the following:
 ```go
-creds := t.TwitterCredentials{
+import (
+  "github.com/cpustejovsky/twitterbot"
+  "github.com/mailgun/mailgun-go/v4"
+)
+
+
+creds := twitterbot.TwitterCredentials{
 	AccessToken:       os.Getenv("TWITTER_ACCESS_TOKEN"),
 	AccessTokenSecret: os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"),
 	ConsumerKey:       os.Getenv("TWITTER_CONSUMER_KEY"),
@@ -33,7 +39,7 @@ Pass in `creds` and `mg` along with a slice of Twitter usernames, the number of 
 
 **Example:**
 ```go
-err := bot.EmailUnreadTweets(creds, mg, []string{"FluffyHookers", "elpidophoros"}, 5, "charles.pustejovsky@gmail.com")
+err := twitterbot.EmailUnreadTweets(creds, mg, []string{"FluffyHookers", "elpidophoros"}, 5, "charles.pustejovsky@gmail.com")
 if err != nil {
   log.Fatal(err)
 }
