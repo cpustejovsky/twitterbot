@@ -36,7 +36,11 @@ func formatHtml(u []User, m *mailgun.Message) {
 		if len(user.tweets) > 0 {
 			tweets.WriteString("<h3>Tweets from " + user.name + "</h3><ul>")
 			for _, tweet := range user.tweets {
-				tweets.WriteString("<li>" + tweet.text + " <a target='_blank' rel='noopener noreferrer' href=" + tweet.link + ">(link)</a></li>")
+				tweets.WriteString("<li>" + tweet.text + " <a target='_blank' rel='noopener noreferrer' href=" + tweet.link + ">(link)</a>")
+				if tweet.liked.success == false {
+					tweets.WriteString("\n There may have been an error liking this tweet: " + tweet.liked.msg)
+				}
+				tweets.WriteString("</li>")
 			}
 			tweets.WriteString("</ul>")
 		}
