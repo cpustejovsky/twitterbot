@@ -8,11 +8,16 @@ import (
 	"github.com/mailgun/mailgun-go/v4"
 )
 
+type Liked struct {
+	success bool
+	msg     string
+}
+
 type userTweet struct {
 	text  string
 	id    string
 	link  string
-	liked bool
+	liked Liked
 }
 
 type User struct {
@@ -98,12 +103,15 @@ func findUserTweets(t *twitter.Client, userName string, count int) User {
 func modifyAndAddTweetsToUser(t *twitter.Client, u User, tweets []twitter.Tweet) User {
 	for _, tweet := range tweets {
 		if tweet.Favorited == false {
-			ok := likeTweet(t, tweet)
+			ok, msg := likeTweet(t, tweet)
 			ut := userTweet{
-				text:  tweet.FullText,
-				id:    tweet.IDStr,
-				link:  fmt.Sprintf("https://twitter.com/%v/status/%v", u.name, tweet.IDStr),
-				liked: ok,
+				text: tweet.FullText,
+				id:   tweet.IDStr,
+				link: fmt.Sprintf("https://twitter.com/%v/status/%v", u.name, tweet.IDStr),
+				liked: Liked{
+					success: ok,
+					msg:     msg,
+				},
 			}
 			u.tweets = append(u.tweets, ut)
 		}
@@ -113,14 +121,14 @@ func modifyAndAddTweetsToUser(t *twitter.Client, u User, tweets []twitter.Tweet)
 }
 
 //likeTweet uses the Twitter API to like a tweet. If there was an error, it returns false, indicating that there was a problem liking the tweet
-func likeTweet(t *twitter.Client, tweet twitter.Tweet) bool {
+func likeTweet(t *twitter.Client, tweet twitter.Tweet) (bool, string) {
 	var p twitter.FavoriteCreateParams
 	p.ID = tweet.ID
 	_, rc, err := t.Favorites.Create(&p)
 	if rc.StatusCode != 200 || err != nil {
 		fmt.Println("Status Code: ", rc.StatusCode)
 		fmt.Println("Error:\n", err)
-		return false
+		return false, fmt.Sprintf("Status Code: %v\n Error Message: %v\n", rc.StatusCode, err)
 	}
-	return true
+	return true, "success"
 }
