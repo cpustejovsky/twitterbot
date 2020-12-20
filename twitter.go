@@ -50,7 +50,9 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 	}
 	for i := 0; i < cap(c); i++ {
 		user := <-c
-		tb.users = append(tb.users, user)
+		if len(user.tweets) > 0 {
+			tb.users = append(tb.users, user)
+		}
 	}
 	if err := tb.SendEmail(mg, recipient); err != nil {
 		return err
