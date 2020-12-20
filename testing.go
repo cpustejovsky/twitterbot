@@ -1,17 +1,12 @@
 package bot
 
 import (
+	"reflect"
 	"testing"
 )
 
-func assertEqualBooleans(t *testing.T, got, want bool) {
-	if got != want {
-		t.Errorf("got %v want %v", got, want)
-	}
-}
-
-func assertEqualStrings(t *testing.T, got, want string) {
-	if got != want {
-		t.Errorf("got %v want %v", got, want)
+func assertEqual(t *testing.T, got, want interface{}) {
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got:\n%v\nwant\n%v\n", got, want)
 	}
 }

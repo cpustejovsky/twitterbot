@@ -12,6 +12,6 @@ func TestEmptyError(t *testing.T) {
 	t.Run("returns same string value when implemented", func(t *testing.T) {
 		want := "No new tweets for queried users."
 		got := (*EmptyError).Error(&EmptyError{})
-		assertEqualStrings(t, got, want)
+		assertEqual(t, got, want)
 	})
 }
