@@ -1,11 +1,9 @@
 module github.com/cpustejovsky/twitterbot
 
-go 1.13
+go 1.15
 
 require (
-	github.com/bmizerany/pat v0.0.0-20170815010413-6226ea591a40
-	github.com/dghubble/go-twitter v0.0.0-20200725221434-4bc8ad7ad1b4
-	github.com/dghubble/oauth1 v0.6.0
-	github.com/joho/godotenv v1.3.0
-	github.com/mailgun/mailgun-go/v4 v4.1.3
+	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d // indirect
+	github.com/dghubble/oauth1 v0.6.0 // indirect
+	github.com/mailgun/mailgun-go/v4 v4.3.0 // indirect
 )
