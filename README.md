@@ -52,7 +52,6 @@ if err != nil {
 * Add information about unread notifications
 * Add information about unread messages
 * Use `html/templates` for templating email body instead of string manipulation
-* Look into if it's possible for a twitter bot to like tweets on behalf of a user.
-  * If Possible:
-    * Allow users to connect their Twitter account to estuaryapp.com
-    * refactor the web app to accept a POST request from estuaryapp.com that contains the usernames to use along with the email address.
+* ~~Look into if it's possible for a twitter bot to like tweets on behalf of a user.~~
+* Allow users to connect their Twitter account to estuaryapp.com
+* refactor the web app to accept a POST request from estuaryapp.com that contains the usernames to use along with the email address.
