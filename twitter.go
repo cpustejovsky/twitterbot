@@ -46,7 +46,7 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 
 	c := make(chan User, len(userNames))
 	for _, name := range userNames {
-		go func() { c <- findUserTweets(tb.client, name, count) }()
+		go func(name string) { c <- findUserTweets(tb.client, name, count) }(name)
 	}
 	for i := 0; i < cap(c); i++ {
 		user := <-c
