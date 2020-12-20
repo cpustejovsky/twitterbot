@@ -2,5 +2,5 @@ package bot
 
 import "testing"
 
-func TestModifyAndAddTweetsToUser(t *testing.T){
+func TestModifyAndAddTweetsToUser(t *testing.T) {
 }
