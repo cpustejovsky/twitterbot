@@ -27,7 +27,6 @@ type User struct {
 
 type TwitterBot struct {
 	client *twitter.Client
-	users  []User
 }
 
 type TwitterCredentials struct {
@@ -43,18 +42,18 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 	if err != nil {
 		return err
 	}
-
-	c := make(chan User, len(userNames))
+	var users []User
+	c := make(chan User)
 	for _, name := range userNames {
 		go func(name string) { c <- findUserTweets(tb.client, name, count) }(name)
 	}
-	for i := 0; i < cap(c); i++ {
+	for i := 0; i < len(userNames); i++ {
 		user := <-c
 		if len(user.tweets) > 0 {
-			tb.users = append(tb.users, user)
+			users = append(users, user)
 		}
 	}
-	if err := tb.SendEmail(mg, recipient); err != nil {
+	if err := SendEmail(mg, recipient, users); err != nil {
 		return err
 	}
 	return nil
