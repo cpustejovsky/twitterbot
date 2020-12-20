@@ -2,7 +2,6 @@ package bot
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -40,19 +39,17 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 		return err
 	}
 
-	var wg sync.WaitGroup
-
+	c := make(chan User, len(userNames))
 	for _, name := range userNames {
-		wg.Add(1)
-		go tb.findUserTweets(&wg, name, count)
+		go func() { c <- findUserTweets(tb.client, name, count) }()
 	}
-
-	wg.Wait()
-
+	for i := 0; i < cap(c); i++ {
+		user := <-c
+		tb.users = append(tb.users, user)
+	}
 	if err := tb.SendEmail(mg, recipient); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -79,31 +76,29 @@ func newBot(creds TwitterCredentials) (TwitterBot, error) {
 }
 
 //FindUserTweets takes finds count tweets for userName and passes a User struct to channel
-func (tb *TwitterBot) findUserTweets(wg *sync.WaitGroup, userName string, count int) {
-	defer wg.Done()
-
+func findUserTweets(t *twitter.Client, userName string, count int) User {
 	params := &twitter.UserTimelineParams{
 		ScreenName: userName,
 		Count:      count,
 		TweetMode:  "extended",
 	}
-	tweets, resp, err := tb.client.Timelines.UserTimeline(params)
+	tweets, resp, err := t.Timelines.UserTimeline(params)
 	u := User{
 		name: userName,
 	}
 	if err != nil && resp.StatusCode == 200 {
 		fmt.Println(resp.StatusCode)
 		fmt.Println(err)
-		return
+		return u
 	}
-	u = tb.modifyAndAddTweetsToUser(u, tweets)
-	tb.users = append(tb.users, u)
+	u = modifyAndAddTweetsToUser(t, u, tweets)
+	return u
 }
 
-func (tb *TwitterBot) modifyAndAddTweetsToUser(u User, tweets []twitter.Tweet) User {
+func modifyAndAddTweetsToUser(t *twitter.Client, u User, tweets []twitter.Tweet) User {
 	for _, tweet := range tweets {
 		if tweet.Favorited == false {
-			tb.likeTweet(tweet)
+			likeTweet(t, tweet)
 			ut := userTweet{
 				text: tweet.FullText,
 				id:   tweet.IDStr,
@@ -116,8 +111,8 @@ func (tb *TwitterBot) modifyAndAddTweetsToUser(u User, tweets []twitter.Tweet) U
 	return u
 }
 
-func (tb *TwitterBot) likeTweet(tweet twitter.Tweet) {
+func likeTweet(t *twitter.Client, tweet twitter.Tweet) {
 	var p twitter.FavoriteCreateParams
 	p.ID = tweet.ID
-	tb.client.Favorites.Create(&p)
+	t.Favorites.Create(&p)
 }
