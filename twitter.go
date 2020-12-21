@@ -100,7 +100,7 @@ func modifyAndAddTweetsToUser(t *twitter.Client, u User, tweets []twitter.Tweet)
 	for _, tweet := range tweets {
 		if tweet.Favorited == false {
 			ok, msg := likeTweet(t, tweet)
-			ut := userTweet{
+			u.tweets = append(u.tweets, userTweet{
 				text: tweet.FullText,
 				id:   tweet.IDStr,
 				link: fmt.Sprintf("https://twitter.com/%v/status/%v", u.name, tweet.IDStr),
@@ -108,8 +108,7 @@ func modifyAndAddTweetsToUser(t *twitter.Client, u User, tweets []twitter.Tweet)
 					success: ok,
 					msg:     msg,
 				},
-			}
-			u.tweets = append(u.tweets, ut)
+			})
 		}
 	}
 	u.name = tweets[0].User.Name
