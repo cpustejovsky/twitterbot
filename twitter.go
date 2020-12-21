@@ -92,7 +92,9 @@ func findUserTweets(t *twitter.Client, userName string, count int) User {
 		fmt.Println(err)
 		return u
 	}
-	u = modifyAndAddTweetsToUser(t, u, tweets)
+	if len(tweets) > 0 {
+		u = modifyAndAddTweetsToUser(t, u, tweets)
+	}
 	return u
 }
 
