@@ -49,8 +49,8 @@ func formatHtml(u []User, m *mailgun.Message) {
 	m.SetHtml(tweets.String())
 }
 
-func (tb *TwitterBot) SendEmail(mg *mailgun.MailgunImpl, recipient string) error {
-	err := checkUsers(tb.users)
+func SendEmail(mg *mailgun.MailgunImpl, recipient string, users []User) error {
+	err := checkUsers(users)
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func (tb *TwitterBot) SendEmail(mg *mailgun.MailgunImpl, recipient string) error
 
 	m := mg.NewMessage(sender, subject, html, recipient)
 
-	formatHtml(tb.users, m)
+	formatHtml(users, m)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()

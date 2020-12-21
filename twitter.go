@@ -25,11 +25,6 @@ type User struct {
 	tweets []userTweet
 }
 
-type TwitterBot struct {
-	client *twitter.Client
-	users  []User
-}
-
 type TwitterCredentials struct {
 	ConsumerKey       string
 	ConsumerSecret    string
@@ -39,29 +34,30 @@ type TwitterCredentials struct {
 
 //EmailUnreadTweets takes Twitter API credentials, a MailGun implementation, a slice of Twitter usernames, and a count of how many tweets to check and sends emails of unread tweets to the recipient's email address
 func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNames []string, count int, recipient string) error {
-	tb, err := newBot(creds)
+	tc, err := newClient(creds)
 	if err != nil {
 		return err
 	}
 
 	c := make(chan User, len(userNames))
 	for _, name := range userNames {
-		go func(name string) { c <- findUserTweets(tb.client, name, count) }(name)
+		go func(name string) { c <- findUserTweets(tc, name, count) }(name)
 	}
+	var users []User
 	for i := 0; i < cap(c); i++ {
 		user := <-c
 		if len(user.tweets) > 0 {
-			tb.users = append(tb.users, user)
+			users = append(users, user)
 		}
 	}
-	if err := tb.SendEmail(mg, recipient); err != nil {
+	if err := SendEmail(mg, recipient, users); err != nil {
 		return err
 	}
 	return nil
 }
 
-//NewBot creates a twitter bot based on Twitter API credentials
-func newBot(creds TwitterCredentials) (TwitterBot, error) {
+//newClient creates a twitter bot based on Twitter API credentials
+func newClient(creds TwitterCredentials) (*twitter.Client, error) {
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
 
@@ -75,11 +71,9 @@ func newBot(creds TwitterCredentials) (TwitterBot, error) {
 
 	_, _, err := client.Accounts.VerifyCredentials(verifyParams)
 	if err != nil {
-		return TwitterBot{}, err
+		return nil, err
 	}
-	tb := &TwitterBot{}
-	tb.client = client
-	return *tb, nil
+	return client, nil
 }
 
 //FindUserTweets takes finds count tweets for userName and passes a User struct to channel
