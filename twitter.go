@@ -100,20 +100,36 @@ func modifyAndAddTweetsToUser(t *twitter.Client, u User, tweets []twitter.Tweet)
 	for _, tweet := range tweets {
 		if tweet.Favorited == false {
 			ok, msg := likeTweet(t, tweet)
-			ut := userTweet{
-				text: tweet.FullText,
-				id:   tweet.IDStr,
-				link: fmt.Sprintf("https://twitter.com/%v/status/%v", u.name, tweet.IDStr),
-				liked: Liked{
-					success: ok,
-					msg:     msg,
-				},
-			}
+
+			liked := newLikedStruct(ok, msg)
+
+			link := fmt.Sprintf("https://twitter.com/%v/status/%v", u.name, tweet.IDStr)
+
+			ut := newUserTweet(tweet.FullText, tweet.IDStr, link, liked)
+
 			u.tweets = append(u.tweets, ut)
 		}
 	}
 	u.name = tweets[0].User.Name
 	return u
+}
+
+func newLikedStruct(success bool, msg string) Liked {
+	liked := Liked{}
+	liked.success = success
+	liked.msg = msg
+
+	return liked
+}
+
+func newUserTweet(FullText, IDStr, link string, liked Liked) userTweet {
+	ut := userTweet{}
+	ut.text = FullText
+	ut.id = IDStr
+	ut.link = link
+	ut.liked = liked
+
+	return ut
 }
 
 //likeTweet uses the Twitter API to like a tweet. If there was an error, it returns false, indicating that there was a problem liking the tweet
