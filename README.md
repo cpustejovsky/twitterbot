@@ -14,32 +14,50 @@ MG_DOMAIN: "your MailGun email domain"
 PORT: "the port number you want to use on local"
 ```
 
-Then to add these to `bot.EmailUnreadTweets()` use that information to create the following:
+Then set up your credentials and use them to create a new client.
 ```go
 import (
-  "github.com/cpustejovsky/twitterbot"
+  bot "github.com/cpustejovsky/twitterbot"
   "github.com/mailgun/mailgun-go/v4"
 )
 
-
-creds := twitterbot.TwitterCredentials{
+creds := bot.TwitterCredentials{
 	AccessToken:       os.Getenv("TWITTER_ACCESS_TOKEN"),
 	AccessTokenSecret: os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"),
 	ConsumerKey:       os.Getenv("TWITTER_CONSUMER_KEY"),
 	ConsumerSecret:    os.Getenv("TWITTER_CONSUMER_SECRET"),
 }
-mg, err := mailgun.NewMailgunFromEnv()
+
+tc, err := bot.NewClient(creds)
 if err != nil {
-	log.Fatal(err)
+  log.Fatal(err)
 }
 ```
 ## Use
 
-Pass in `creds` and `mg` along with a slice of Twitter usernames, the number of tweets you want to check, and a recipient email address.
+### Collecting unfavorited (unliked) tweets
+
+Pass in the Twitter API client and a MailGun API instance along with a slice of Twitter usernames, the number of tweets you want to check.
+
+```go
+usernames := []{"foo", "bar"}
+
+ut := CollectUserTweets(tc, usernames, 5)
+```
+
+### Email Unread Tweets
+
+Pass in the Twitter API client and a MailGun API instance along with a slice of Twitter usernames, the number of tweets you want to check, and a recipient email address.
 
 **Example:**
 ```go
-err := twitterbot.EmailUnreadTweets(creds, mg, []string{"FluffyHookers", "elpidophoros"}, 5, "charles.pustejovsky@gmail.com")
+
+mg, err := mailgun.NewMailgunFromEnv()
+if err != nil {
+	log.Fatal(err)
+}
+
+err := bot.EmailUnreadTweets(tc, mg, []string{"FluffyHookers", "elpidophoros"}, 5, "charles.pustejovsky@gmail.com")
 if err != nil {
   log.Fatal(err)
 }
@@ -49,9 +67,9 @@ if err != nil {
 * ~~Set up as a web app on a Heroku dyno that [dyno-waker](https://github.com/cpustejovsky/dyno-waker) can hit daily.~~
 * ~~Add tests~~
 * ~~Pass in twitter usernames as parameters~~
+* ~~Look into if it's possible for a twitter bot to like tweets on behalf of a user.~~
 * Add information about unread notifications
 * Add information about unread messages
-* Use `html/templates` for templating email body instead of string manipulation
-* ~~Look into if it's possible for a twitter bot to like tweets on behalf of a user.~~
 * Allow users to connect their Twitter account to estuaryapp.com
-* refactor the web app to accept a POST request from estuaryapp.com that contains the usernames to use along with the email address.
+* Provide functionality for other users
+* Use `html/templates` for templating email body instead of string manipulation
