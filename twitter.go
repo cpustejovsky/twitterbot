@@ -32,13 +32,8 @@ type TwitterCredentials struct {
 	AccessTokenSecret string
 }
 
-//EmailUnreadTweets takes Twitter API credentials, a MailGun implementation, a slice of Twitter usernames, and a count of how many tweets to check and sends emails of unread tweets to the recipient's email address
-func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNames []string, count int, recipient string) error {
-	tc, err := newClient(creds)
-	if err != nil {
-		return err
-	}
-
+//EmailUnreadTweets takes Twitter API client, a MailGun implementation, a slice of Twitter usernames, and a count of how many tweets to check and sends emails of unread tweets to the recipient's email address
+func EmailUnreadTweets(tc *twitter.Client, mg *mailgun.MailgunImpl, userNames []string, count int, recipient string) error {
 	users := CollectUserTweets(tc, userNames, count)
 
 	if err := SendEmail(mg, recipient, users); err != nil {
@@ -47,8 +42,8 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 	return nil
 }
 
-//newClient creates a twitter bot based on Twitter API credentials
-func newClient(creds TwitterCredentials) (*twitter.Client, error) {
+//NewClient creates a Twitter client based on Twitter API credentials
+func NewClient(creds TwitterCredentials) (*twitter.Client, error) {
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
 
@@ -67,6 +62,8 @@ func newClient(creds TwitterCredentials) (*twitter.Client, error) {
 	return client, nil
 }
 
+/*CollectUserTweets takes a Twitter API Client, a slice of Twitter usernames, and a count;
+It returns a slice of those Twitter usernames with their tweets that you account has not favorited*/
 func CollectUserTweets(tc *twitter.Client, userNames []string, count int) []User {
 	c := make(chan User, len(userNames))
 	for _, name := range userNames {
