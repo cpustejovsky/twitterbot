@@ -39,17 +39,8 @@ func EmailUnreadTweets(creds TwitterCredentials, mg *mailgun.MailgunImpl, userNa
 		return err
 	}
 
-	c := make(chan User, len(userNames))
-	for _, name := range userNames {
-		go func(name string) { c <- findUserTweets(tc, name, count) }(name)
-	}
-	var users []User
-	for i := 0; i < cap(c); i++ {
-		user := <-c
-		if len(user.tweets) > 0 {
-			users = append(users, user)
-		}
-	}
+	users := CollectUserTweets(tc, userNames, count)
+
 	if err := SendEmail(mg, recipient, users); err != nil {
 		return err
 	}
@@ -74,6 +65,21 @@ func newClient(creds TwitterCredentials) (*twitter.Client, error) {
 		return nil, err
 	}
 	return client, nil
+}
+
+func CollectUserTweets(tc *twitter.Client, userNames []string, count int) []User {
+	c := make(chan User, len(userNames))
+	for _, name := range userNames {
+		go func(name string) { c <- findUserTweets(tc, name, count) }(name)
+	}
+	var users []User
+	for i := 0; i < cap(c); i++ {
+		user := <-c
+		if len(user.tweets) > 0 {
+			users = append(users, user)
+		}
+	}
+	return users
 }
 
 //FindUserTweets takes finds count tweets for userName and passes a User struct to channel
