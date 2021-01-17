@@ -66,12 +66,14 @@ func NewClient(creds TwitterCredentials) (*twitter.Client, error) {
 It returns a slice of those Twitter usernames with their tweets that you account has not favorited*/
 func CollectUserTweets(tc *twitter.Client, userNames []string, count int) []User {
 	c := make(chan User, len(userNames))
-	for _, name := range userNames {
-		go func(name string) { c <- findUserTweets(tc, name, count) }(name)
-	}
+	go func() {
+		defer close(c)
+		for _, name := range userNames {
+			c <- findUserTweets(tc, name, count)
+		}
+	}()
 	var users []User
-	for i := 0; i < cap(c); i++ {
-		user := <-c
+	for user := range c {
 		if len(user.tweets) > 0 {
 			users = append(users, user)
 		}
