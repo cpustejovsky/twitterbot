@@ -2,6 +2,8 @@ package twitterbot
 
 import (
 	"fmt"
+	"runtime"
+	"sync"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -72,6 +74,39 @@ func CollectUserTweets(tc *twitter.Client, userNames []string, count int) []User
 			c <- findUserTweets(tc, name, count)
 		}
 	}()
+	var users []User
+	for user := range c {
+		if len(user.tweets) > 0 {
+			users = append(users, user)
+		}
+	}
+	return users
+}
+
+func CollectUserTweetsV2(tc *twitter.Client, userNames []string, count int) []User {
+	g := runtime.GOMAXPROCS(0)
+	var wg sync.WaitGroup
+	wg.Add(g)
+	c := make(chan User, g)
+	defer close(c)
+
+	for i := 0; i < g; i++ {
+		defer wg.Done()
+		go func() {
+			for user := range c {
+				c <- findUserTweets(tc, user.name, count)
+			}
+		}()
+	}
+
+	for _, userName := range userNames {
+		var u = User{
+			name:   userName,
+			tweets: []userTweet{},
+		}
+		c <- u
+	}
+	wg.Wait()
 	var users []User
 	for user := range c {
 		if len(user.tweets) > 0 {
