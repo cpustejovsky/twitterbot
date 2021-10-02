@@ -169,3 +169,57 @@ func likeTweet(t *twitter.Client, tweet twitter.Tweet) (bool, string) {
 	}
 	return true, "success"
 }
+
+//UnlikeUsersTweets takes finds count tweets for userName and passes a User struct to channel
+func UnlikeUsersTweets(tc *twitter.Client, userNames []string, count int) []string {
+	c := make(chan string, len(userNames))
+	go func() {
+		defer close(c)
+		for _, name := range userNames {
+			c <- unlikeUserTweets(tc, name, count)
+		}
+	}()
+	var messages []string
+	for message := range c {
+		messages = append(messages, message)
+	}
+	return messages
+}
+
+//unlikeUserTweets takes finds count tweets for userName and passes a User struct to channel
+func unlikeUserTweets(t *twitter.Client, userName string, count int) string {
+	params := &twitter.UserTimelineParams{
+		ScreenName: userName,
+		Count:      count,
+		TweetMode:  "extended",
+	}
+	tweets, resp, err := t.Timelines.UserTimeline(params)
+	if err != nil && resp.StatusCode != 200 {
+		fmt.Println(resp.StatusCode)
+		fmt.Println(err)
+		return fmt.Sprintf("Status Code: %v\n Error Message: %v\n", resp.StatusCode, err)
+	}
+	if len(tweets) > 0 {
+		err, msg := unlikeTweets(t, tweets)
+		if err != nil {
+			return msg
+		}
+		return msg
+	}
+	return "no tweets found"
+}
+
+//UnlikeTweet uses the Twitter API to remove a like for a tweet. If there was an error, it returns false, indicating that there was a problem liking the tweet
+func unlikeTweets(t *twitter.Client, tweets []twitter.Tweet) (error, string) {
+	var p twitter.FavoriteDestroyParams
+	for _, tweet := range tweets {
+		p.ID = tweet.ID
+		_, rc, err := t.Favorites.Destroy(&p)
+		if rc.StatusCode != 200 || err != nil {
+			fmt.Println("Status Code: ", rc.StatusCode)
+			fmt.Println("Error:\n", err)
+			return err, fmt.Sprintf("Status Code: %v\n Error Message: %v\n", rc.StatusCode, err)
+		}
+	}
+	return nil, "success"
+}
