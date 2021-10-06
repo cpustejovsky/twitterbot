@@ -2,8 +2,8 @@ package twitterbot
 
 import (
 	"fmt"
+	"log"
 	"runtime"
-	"sync"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -23,8 +23,8 @@ type userTweet struct {
 }
 
 type User struct {
-	name   string
-	tweets []userTweet
+	Name   string
+	Tweets []userTweet
 }
 
 type TwitterCredentials struct {
@@ -76,7 +76,7 @@ func CollectUserTweets(tc *twitter.Client, userNames []string, count int) []User
 	}()
 	var users []User
 	for user := range c {
-		if len(user.tweets) > 0 {
+		if len(user.Tweets) > 0 {
 			users = append(users, user)
 		}
 	}
@@ -85,31 +85,20 @@ func CollectUserTweets(tc *twitter.Client, userNames []string, count int) []User
 
 func CollectUserTweetsV2(tc *twitter.Client, userNames []string, count int) []User {
 	g := runtime.GOMAXPROCS(0)
-	var wg sync.WaitGroup
-	wg.Add(g)
 	c := make(chan User, g)
-	defer close(c)
-
-	for i := 0; i < g; i++ {
-		defer wg.Done()
-		go func() {
-			for user := range c {
-				c <- findUserTweets(tc, user.name, count)
-			}
-		}()
+	for _, name := range userNames {
+		log.Println(name)
 	}
-
-	for _, userName := range userNames {
-		var u = User{
-			name:   userName,
-			tweets: []userTweet{},
-		}
-		c <- u
-	}
-	wg.Wait()
+	log.Println("input user length", len(userNames))
 	var users []User
+	go func() {
+		defer close(c)
+		for _, name := range userNames {
+			c <- findUserTweets(tc, name, count)
+		}
+	}()
 	for user := range c {
-		if len(user.tweets) > 0 {
+		if len(user.Tweets) > 0 {
 			users = append(users, user)
 		}
 	}
@@ -125,7 +114,7 @@ func findUserTweets(t *twitter.Client, userName string, count int) User {
 	}
 	tweets, resp, err := t.Timelines.UserTimeline(params)
 	u := User{
-		name: userName,
+		Name: userName,
 	}
 	if err != nil && resp.StatusCode == 200 {
 		fmt.Println(resp.StatusCode)
@@ -142,10 +131,10 @@ func modifyAndAddTweetsToUser(t *twitter.Client, u User, tweets []twitter.Tweet)
 	for _, tweet := range tweets {
 		if tweet.Favorited == false {
 			ok, msg := likeTweet(t, tweet)
-			u.tweets = append(u.tweets, userTweet{
+			u.Tweets = append(u.Tweets, userTweet{
 				text: tweet.FullText,
 				id:   tweet.IDStr,
-				link: fmt.Sprintf("https://twitter.com/%v/status/%v", u.name, tweet.IDStr),
+				link: fmt.Sprintf("https://twitter.com/%v/status/%v", u.Name, tweet.IDStr),
 				liked: Liked{
 					success: ok,
 					msg:     msg,
@@ -153,7 +142,7 @@ func modifyAndAddTweetsToUser(t *twitter.Client, u User, tweets []twitter.Tweet)
 			})
 		}
 	}
-	u.name = tweets[0].User.Name
+	u.Name = tweets[0].User.Name
 	return u
 }
 
@@ -186,7 +175,7 @@ func UnlikeUsersTweets(tc *twitter.Client, userNames []string, count int) []stri
 	return messages
 }
 
-//unlikeUserTweets takes finds count tweets for userName and passes a User struct to channel
+//unlikeUserTweets takes finds count tweets for userName and passes a message to channel
 func unlikeUserTweets(t *twitter.Client, userName string, count int) string {
 	params := &twitter.UserTimelineParams{
 		ScreenName: userName,
@@ -209,10 +198,12 @@ func unlikeUserTweets(t *twitter.Client, userName string, count int) string {
 	return "no tweets found"
 }
 
-//UnlikeTweet uses the Twitter API to remove a like for a tweet. If there was an error, it returns false, indicating that there was a problem liking the tweet
+//UnlikeTweet uses the Twitter API to remove a like for a tweet.
 func unlikeTweets(t *twitter.Client, tweets []twitter.Tweet) (error, string) {
 	var p twitter.FavoriteDestroyParams
 	for _, tweet := range tweets {
+		fmt.Println("tweetId: ", tweet.ID)
+		fmt.Println("tweetId: ", tweet.Text)
 		p.ID = tweet.ID
 		_, rc, err := t.Favorites.Destroy(&p)
 		if rc.StatusCode != 200 || err != nil {
