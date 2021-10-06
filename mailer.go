@@ -18,7 +18,7 @@ func (e *EmptyError) Error() string {
 func checkUsers(u []User) error {
 	empties := 0
 	for _, user := range u {
-		if len(user.tweets) == 0 {
+		if len(user.Tweets) == 0 {
 			empties++
 		}
 	}
@@ -33,9 +33,9 @@ func formatHtml(u []User, m *mailgun.Message) {
 	var tweets bytes.Buffer
 	tweets.WriteString("<h1>Daily Tweet Update</h1>")
 	for _, user := range u {
-		if len(user.tweets) > 0 {
-			tweets.WriteString("<h3>Tweets from " + user.name + "</h3><ul>")
-			for _, tweet := range user.tweets {
+		if len(user.Tweets) > 0 {
+			tweets.WriteString("<h3>Tweets from " + user.Name + "</h3><ul>")
+			for _, tweet := range user.Tweets {
 				tweets.WriteString("<li>" + tweet.text + " <a target='_blank' rel='noopener noreferrer' href=" + tweet.link + ">(link)</a>")
 				if tweet.liked.success == false {
 					tweets.WriteString("\n There may have been an error liking this tweet: " + tweet.liked.msg)
